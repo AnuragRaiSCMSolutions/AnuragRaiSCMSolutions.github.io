@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Getting Time Profiles Right</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Inter:wght@400;500;600&display=swap">
+
+<style>
+/* Layout: centered editorial column, warm professional palette */
+:root {
+  --bg: #faf8f5;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --text-secondary: #4a4a4a;
+  --text-muted: #7a7a7a;
+  --accent: #2c5f8a;
+  --accent-light: #e8f0f7;
+  --border: #e5e0d8;
+  --border-light: #f0ece6;
+  --callout-bg: #f5f1eb;
+  --font-display: 'Source Serif 4', 'Georgia', serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141210;
+    --surface: #1e1c18;
+    --text: #e4dfd6;
+    --text-secondary: #b0a898;
+    --text-muted: #7a7268;
+    --accent: #6aabdb;
+    --accent-light: #1c2a38;
+    --border: #2e2a24;
+    --border-light: #242118;
+    --callout-bg: #1a1816;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141210;
+  --surface: #1e1c18;
+  --text: #e4dfd6;
+  --text-secondary: #b0a898;
+  --text-muted: #7a7268;
+  --accent: #6aabdb;
+  --accent-light: #1c2a38;
+  --border: #2e2a24;
+  --border-light: #242118;
+  --callout-bg: #1a1816;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  margin: 0;
+  padding: 0 max(16px, env(safe-area-inset-left, 0px)) 0 max(16px, env(safe-area-inset-right, 0px));
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 680px;
+  margin: 1rem auto 0;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+.back-link:hover { color: var(--accent); }
+.back-link::before { content: "\2190"; }
+
+.article {
+  max-width: 680px;
+  margin: 0 auto;
+  padding-top: 1rem;
+  padding-bottom: 4rem;
+}
+
+/* Header */
+.article-header {
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2rem;
+}
+.article-header .kicker {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+.article-header h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.8rem, 4.5vw, 2.5rem);
+  line-height: 1.2;
+  margin: 0 0 1rem;
+  text-wrap: balance;
+}
+.article-header .subtitle {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+}
+.byline {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.byline strong {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Body */
+.article h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin: 2.5rem 0 0.75rem;
+  line-height: 1.3;
+}
+.article h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 2rem 0 0.5rem;
+  color: var(--text-secondary);
+}
+.article p {
+  margin: 0 0 1.15rem;
+  color: var(--text-secondary);
+}
+.article p:first-of-type {
+  color: var(--text);
+}
+
+/* Lead paragraph */
+.lead {
+  font-size: 1.08rem;
+  line-height: 1.75;
+  color: var(--text) !important;
+}
+
+/* Callout */
+.callout {
+  background: var(--callout-bg);
+  border-left: 3px solid var(--accent);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+}
+.callout strong { color: var(--text); }
+
+/* Table */
+.table-wrap {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  min-width: 480px;
+}
+.table-wrap th {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-align: left;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 2px solid var(--border);
+  background: var(--callout-bg);
+}
+.table-wrap td {
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-secondary);
+}
+.table-wrap tbody tr:last-child td { border-bottom: none; }
+
+/* Diagram */
+.diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  overflow-x: auto;
+}
+.diagram-title {
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+.week-row {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 4px;
+  min-width: 420px;
+}
+.week-row .day {
+  flex: 1;
+  text-align: center;
+  padding: 0.35rem 0.2rem;
+  border-radius: 3px;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+}
+.day.month-a { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+.day.month-b { background: var(--callout-bg); color: var(--text-muted); }
+.split-label {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.35rem;
+  font-weight: 600;
+  font-size: 0.78rem;
+  min-width: 420px;
+}
+.split-label .a { color: var(--accent); }
+.split-label .b { color: var(--text-muted); }
+
+/* List */
+.article ul {
+  margin: 0.5rem 0 1.25rem;
+  padding-left: 1.3rem;
+  color: var(--text-secondary);
+}
+.article li {
+  margin-bottom: 0.4rem;
+}
+.article li strong { color: var(--text); }
+
+/* Section break */
+.section-break {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2.5rem 0;
+  color: var(--border);
+}
+.section-break::before,
+.section-break::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Footer */
+.article-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .article { padding-top: 0.5rem; }
+  .article-header h1 { font-size: 1.6rem; }
+}
+</style>
+</head>
+<body>
+
+<a href="../" class="back-link">Home</a>
+
+<article class="article">
+  <header class="article-header">
+    <div class="kicker">SAP IBP Configuration</div>
+    <h1>Getting the Time Profile Right: Why It Matters and How to Make It Easier</h1>
+    <p class="subtitle">Across geographies and industries, businesses plan in different rhythms. Generating a time profile that respects those rhythms is one of the first things a consultant configures in IBP &mdash; and one of the most important to get right.</p>
+    <div class="byline">By <strong>Anurag Rai</strong></div>
+  </header>
+
+  <p class="lead">When a new SAP IBP implementation begins, the time profile is one of the very first configuration steps. It defines the planning calendar that every subsequent process &mdash; demand sensing, supply planning, inventory optimization &mdash; will operate within. If the time profile doesn't match how the business actually measures its periods, every downstream process inherits that misalignment.</p>
+
+  <p>And yet, across the world, there is no single way that businesses bucket their time.</p>
+
+  <h2>The Variety of Business Calendars</h2>
+
+  <p>A manufacturing company in Germany plans in calendar months starting Monday. A retail chain in the United States follows a 4-5-4 fiscal calendar where every month is an exact number of weeks. A logistics firm in Saudi Arabia starts its week on Friday. A consumer goods company in India aligns its fiscal year to April.</p>
+
+  <p>These are not edge cases. They represent the reality that planning calendars are shaped by local regulations, industry conventions, financial reporting requirements, and operational rhythms. Consider just a few of the variations a consultant encounters:</p>
+
+  <ul>
+    <li><strong>Week start day</strong> &mdash; Monday is standard in Europe, Sunday in the Americas, Friday or Saturday in parts of the Middle East and South Asia</li>
+    <li><strong>Fiscal year anchor</strong> &mdash; January, April, July, or October depending on the country and industry</li>
+    <li><strong>Retail fiscal calendars</strong> &mdash; 4-4-5, 4-5-4, or 5-4-4 patterns where months are exact multiples of weeks, eliminating the day-of-week variance that plagues calendar month comparisons</li>
+    <li><strong>Technical weeks</strong> &mdash; weeks that split at month boundaries, essential for financial reconciliation and weighted disaggregation in IBP</li>
+  </ul>
+
+  <p>Each combination produces a different time profile. And every one of them needs to be uploaded into IBP as a structured file with the right period IDs, hierarchies, and date boundaries.</p>
+
+  <h2>Why Technical Weeks Matter</h2>
+
+  <p>Among the six period levels that IBP works with, the technical week is perhaps the least intuitive but most operationally significant. When a regular 7-day week crosses a month boundary, it gets split into two parts:</p>
+
+  <div class="diagram">
+    <div class="diagram-title">Technical Week Split at Month Boundary</div>
+    <div class="week-row">
+      <div class="day month-a">Mon 28</div>
+      <div class="day month-a">Tue 29</div>
+      <div class="day month-a">Wed 30</div>
+      <div class="day month-a">Thu 31</div>
+      <div class="day month-b">Fri 1</div>
+      <div class="day month-b">Sat 2</div>
+      <div class="day month-b">Sun 3</div>
+    </div>
+    <div class="split-label">
+      <span class="a">TW18a &mdash; 4 days in January</span>
+      <span class="b">TW18b &mdash; 3 days in February</span>
+    </div>
+  </div>
+
+  <p>This split is what allows IBP to use the <strong>WEEKWEIGHT</strong> attribute &mdash; disaggregating monthly figures to weeks proportionally by how many days each week fragment contributes to the month. Without correctly generated technical weeks, financial reconciliation between weekly plans and monthly actuals breaks down.</p>
+
+  <h2>Retail Fiscal Calendars: A Different Logic Entirely</h2>
+
+  <p>Retail and consumer goods companies often operate on a fiscal calendar where every period is an exact number of weeks. The most common patterns divide each quarter into three periods:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Pattern</th><th>Quarter Structure</th><th>Weeks per Quarter</th><th>Common Users</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>4-4-5</strong></td><td>4 weeks, 4 weeks, 5 weeks</td><td>13</td><td>NRF standard, many US retailers</td></tr>
+        <tr><td><strong>4-5-4</strong></td><td>4 weeks, 5 weeks, 4 weeks</td><td>13</td><td>Some CPG companies</td></tr>
+        <tr><td><strong>5-4-4</strong></td><td>5 weeks, 4 weeks, 4 weeks</td><td>13</td><td>Some UK and Australian retailers</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>The advantage is comparability: every "month" has the same number of weekdays, so year-over-year sales comparisons aren't distorted by whether a month happened to contain four Saturdays or five. Every quarter is exactly 91 days.</p>
+
+  <p>The trade-off is the <strong>leap week</strong>. A 52-week fiscal year is 364 days, one day short of a calendar year. Over five to six years, this drift accumulates to a full week, and a 53rd week must be inserted &mdash; typically into the last period of Q4 &mdash; to realign the fiscal calendar with the Gregorian one.</p>
+
+  <div class="callout">
+    <strong>In practice:</strong> A fiscal calendar starting January 1, 2024 will produce 52-week years until around 2028&ndash;2029, when the accumulated one-day-per-year drift triggers a 53-week year. Detecting this automatically and placing the extra week correctly is essential for a valid time profile.
+  </div>
+
+  <h2>The Effort Behind the File</h2>
+
+  <p>Generating a time profile that accounts for all of this &mdash; the right week start, technical week splits, fiscal month boundaries, leap week handling, and correct period IDs across six hierarchy levels &mdash; is not conceptually difficult. But it is tedious, detail-heavy, and easy to get wrong.</p>
+
+  <p>For a consultant setting up a new IBP instance, this typically means:</p>
+
+  <ul>
+    <li>Building a spreadsheet with date arithmetic for each period type</li>
+    <li>Manually adjusting for first-week partial periods and month-boundary splits</li>
+    <li>Validating that period IDs are unique and correctly prefixed by level</li>
+    <li>Regenerating the entire file when the client changes their fiscal year start or week start day</li>
+  </ul>
+
+  <p>Multiply this across implementations, and it adds up. Every engagement begins with this step, and getting it wrong means rework later when plans don't aggregate correctly or financial periods don't reconcile.</p>
+
+  <div class="section-break">&#9670;</div>
+
+  <h2>A Purpose-Built Generator</h2>
+
+  <p>This is the problem the <strong>IBP Time Profile Generator</strong> was built to solve. It is a single HTML file &mdash; no installation, no server, no dependencies &mdash; that a consultant can open in any browser and use immediately.</p>
+
+  <h3>Two Modes, One Output</h3>
+
+  <p>The tool supports two calendar types, selectable with a single toggle:</p>
+
+  <p><strong>Gregorian (Standard)</strong> generates calendar-aligned periods with technical week splits at month boundaries. The week start day is configurable to any day of the week &mdash; Friday, Saturday, Sunday, Monday, or any other.</p>
+
+  <p><strong>Fiscal (Retail)</strong> generates week-based periods following the 4-4-5, 4-5-4, or 5-4-4 pattern. Leap weeks are detected automatically and added to the last period of Q4. Fiscal months can be labeled with approximate Gregorian month names or a custom prefix (P01, P02, etc.).</p>
+
+  <p>Both modes produce all six IBP period levels:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Level</th><th>Gregorian Mode</th><th>Fiscal Mode</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>1 &mdash; Day</strong></td><td>Every calendar day</td><td>Every calendar day</td></tr>
+        <tr><td><strong>2 &mdash; Technical Week</strong></td><td>7-day weeks split at month boundaries (TWa/TWb)</td><td>Same as Week (no splits needed)</td></tr>
+        <tr><td><strong>3 &mdash; Week</strong></td><td>Full 7-day weeks</td><td>7-day weeks within fiscal year</td></tr>
+        <tr><td><strong>4 &mdash; Month</strong></td><td>Calendar months</td><td>4 or 5 weeks per the selected pattern</td></tr>
+        <tr><td><strong>5 &mdash; Quarter</strong></td><td>~3 calendar months</td><td>13 weeks (14 in a 53-week year)</td></tr>
+        <tr><td><strong>6 &mdash; Fiscal Year</strong></td><td>~12 calendar months</td><td>52 or 53 weeks</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>The output is a CSV with Period ID, Start Date, End Date, Description, and Day Count &mdash; ready for IBP upload. What used to take careful spreadsheet work for each new engagement is reduced to selecting a few options and clicking a button.</p>
+
+  <h2>Who This Is For</h2>
+
+  <p>This tool is built for the SAP IBP consultant who has done this work by hand and knows exactly how much care it requires. It is also useful for:</p>
+
+  <ul>
+    <li><strong>Implementation teams</strong> standing up new IBP tenants across different regions and calendar conventions</li>
+    <li><strong>Functional leads</strong> who need to validate that a proposed time profile matches the client's fiscal reporting structure</li>
+    <li><strong>Support teams</strong> regenerating time profiles when a business changes its fiscal year anchor or week start day</li>
+  </ul>
+
+  <p>The time profile sits at the foundation of every IBP planning model. Getting it right from the start means the demand planner comparing week-over-week trends, the supply planner aggregating to monthly buckets, and the finance team reconciling quarterly figures are all working from the same calendar. Getting it wrong is the kind of error that surfaces late and costs more to fix than it would have to prevent.</p>
+
+  <div class="callout">
+    This development is an effort to streamline a consultant's work in generating the time profile file and reduce the overall effort for an activity that, while foundational, should not consume disproportionate project time.
+  </div>
+
+  <footer class="article-footer">
+    <p><strong>Anurag Rai</strong> is an SAP IBP consultant. The <a href="../tools/time-profile-generator.html" style="color:var(--accent);text-decoration:underline;">IBP Time Profile Generator</a> is available as an open-source tool on GitHub.</p>
+  </footer>
+</article>
+
+</body>
+</html>
