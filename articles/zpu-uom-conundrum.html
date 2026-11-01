@@ -2,584 +2,421 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>The ZPU Trick in IBP</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Inter:wght@400;500;600&display=swap">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meet ZPU — The UOM Fix for IBP</title>
+<meta name="description" content="One UOM per planning view. Products vanish. The fix? A dummy self-conversion record called ZPU.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Nunito+Sans:wght@400;600&family=Fira+Code:wght@400&display=swap">
+<link rel="stylesheet" href="../css/style.css">
 <style>
-  :root {
-    --bg: #FAFAF8;
-    --fg: #1A1A1A;
-    --fg-secondary: #4A4A4A;
-    --fg-muted: #7A7A7A;
-    --accent: #2E6B8B;
-    --accent-light: #E2EEF3;
-    --accent-dark: #1D4A60;
-    --surface: #FFFFFF;
-    --border: #DDE2E5;
-    --code-bg: #EDF1F4;
-    --callout-bg: #E8F0F5;
-    --callout-border: #8BB8CF;
-    --warn-bg: #FDF5EC;
-    --warn-border: #D4A855;
-    --warn-fg: #7A5A1A;
-    --success-bg: #ECF5EE;
-    --success-border: #6AAF78;
-    --success-fg: #2D5E38;
-    --font-display: 'Source Serif 4', 'Georgia', serif;
-    --font-body: 'Inter', system-ui, sans-serif;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #131517;
-      --fg: #E3E5E8;
-      --fg-secondary: #A8ADB3;
-      --fg-muted: #6E7580;
-      --accent: #5AADCF;
-      --accent-light: #1A2A33;
-      --accent-dark: #7EC4E0;
-      --surface: #1A1D20;
-      --border: #2A2E33;
-      --code-bg: #1E2226;
-      --callout-bg: #172028;
-      --callout-border: #3A6A82;
-      --warn-bg: #221D14;
-      --warn-border: #8A7035;
-      --warn-fg: #D4B86A;
-      --success-bg: #14201A;
-      --success-border: #3A7A4A;
-      --success-fg: #7AC08A;
-      color-scheme: dark;
-    }
-  }
-
-  :root[data-theme="dark"] {
-    --bg: #131517;
-    --fg: #E3E5E8;
-    --fg-secondary: #A8ADB3;
-    --fg-muted: #6E7580;
-    --accent: #5AADCF;
-    --accent-light: #1A2A33;
-    --accent-dark: #7EC4E0;
-    --surface: #1A1D20;
-    --border: #2A2E33;
-    --code-bg: #1E2226;
-    --callout-bg: #172028;
-    --callout-border: #3A6A82;
-    --warn-bg: #221D14;
-    --warn-border: #8A7035;
-    --warn-fg: #D4B86A;
-    --success-bg: #14201A;
-    --success-border: #3A7A4A;
-    --success-fg: #7AC08A;
-    color-scheme: dark;
-  }
-
-  body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: var(--font-body);
-    font-size: 1rem;
-    line-height: 1.72;
-    margin: 0;
-    padding: 0 max(16px, env(safe-area-inset-left, 0px)) 0 max(16px, env(safe-area-inset-right, 0px));
-  }
-
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    max-width: 700px;
-    margin: 1rem auto 0;
-    font-family: var(--font-body);
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--fg-muted);
-    text-decoration: none;
-  }
-  .back-link:hover { color: var(--accent); }
-  .back-link::before { content: "\2190"; }
-
-  .wrapper {
-    max-width: 700px;
-    margin: 0 auto;
-    padding-block: 1rem 5rem;
-  }
-
-  .series-label {
-    font-family: var(--font-body);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 0.75rem;
-  }
-
-  h1 {
-    font-family: var(--font-display);
-    font-size: clamp(1.85rem, 5vw, 2.6rem);
-    font-weight: 700;
-    line-height: 1.15;
-    text-wrap: balance;
-    color: var(--fg);
-    margin: 0 0 1.2rem;
-  }
-
-  .subtitle {
-    font-family: var(--font-display);
-    font-size: 1.15rem;
-    font-style: italic;
-    color: var(--fg-secondary);
-    line-height: 1.5;
-    margin-bottom: 2rem;
-  }
-
-  .byline {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.85rem;
-    color: var(--fg-muted);
-    padding-bottom: 2.25rem;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 2.5rem;
-  }
-
-  .byline-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--accent-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--accent);
-    flex-shrink: 0;
-  }
-
-  .byline-info strong {
-    color: var(--fg);
-    display: block;
-    font-weight: 600;
-  }
-
-  h2 {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--fg);
-    margin: 2.75rem 0 1rem;
-    text-wrap: balance;
-  }
-
-  h3 {
-    font-family: var(--font-display);
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: var(--fg);
-    margin: 2rem 0 0.65rem;
-  }
-
-  p {
-    margin: 0 0 1.2rem;
-    color: var(--fg-secondary);
-  }
-
-  strong {
-    color: var(--fg);
-    font-weight: 600;
-  }
-
-  code {
-    background: var(--code-bg);
-    padding: 0.15em 0.4em;
-    border-radius: 3px;
-    font-size: 0.87em;
-    font-family: 'SF Mono', 'Menlo', monospace;
-    color: var(--fg);
-  }
-
-  .callout {
-    border-left: 3px solid var(--callout-border);
-    background: var(--callout-bg);
-    padding: 1.2rem 1.4rem;
-    margin: 1.75rem 0;
-    border-radius: 0 6px 6px 0;
-  }
-
-  .callout p { margin: 0; font-size: 0.95rem; }
-
-  .callout-label {
-    font-size: 0.73rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 0.5rem;
-  }
-
-  .warn {
-    border-left-color: var(--warn-border);
-    background: var(--warn-bg);
-  }
-
-  .warn .callout-label { color: var(--warn-fg); }
-  .warn p { color: var(--warn-fg); }
-
-  .success {
-    border-left-color: var(--success-border);
-    background: var(--success-bg);
-  }
-
-  .success .callout-label { color: var(--success-fg); }
-  .success p { color: var(--success-fg); }
-
-  .table-wrap {
-    overflow-x: auto;
-    margin: 1.75rem 0;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.87rem;
-    font-variant-numeric: tabular-nums;
-  }
-
-  thead { background: var(--code-bg); }
-
-  th {
-    font-weight: 600;
-    text-align: left;
-    padding: 0.7rem 1rem;
-    color: var(--fg);
-    white-space: nowrap;
-    font-size: 0.78rem;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-  }
-
-  td {
-    padding: 0.65rem 1rem;
-    border-top: 1px solid var(--border);
-    color: var(--fg-secondary);
-  }
-
-  td code {
-    font-size: 0.82em;
-  }
-
-  .problem-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin: 1.5rem 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .problem-list li {
-    background: var(--warn-bg);
-    border: 1px solid var(--warn-border);
-    border-radius: 6px;
-    padding: 0.85rem 1.1rem;
-    font-size: 0.92rem;
-    color: var(--warn-fg);
-    line-height: 1.55;
-  }
-
-  .problem-list li strong {
-    color: var(--warn-fg);
-  }
-
-  .solution-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin: 1.5rem 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .solution-list li {
-    background: var(--success-bg);
-    border: 1px solid var(--success-border);
-    border-radius: 6px;
-    padding: 0.85rem 1.1rem;
-    font-size: 0.92rem;
-    color: var(--success-fg);
-    line-height: 1.55;
-  }
-
-  .solution-list li strong {
-    color: var(--success-fg);
-  }
-
   .zpu-badge {
     display: inline-block;
     background: var(--accent);
     color: #fff;
-    font-family: 'SF Mono', 'Menlo', monospace;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 0.2em 0.55em;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 400;
+    padding: 2px 8px;
     border-radius: 4px;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     vertical-align: middle;
   }
-
-  hr {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 2.75rem 0;
-  }
-
-  .tags {
+  .problem-list, .solution-list {
+    list-style: none;
+    padding: 0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 2rem 0 0;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 0 20px;
   }
-
-  .tag {
+  .problem-list li {
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    font-size: 15px;
+    color: #92400E;
+    line-height: 1.6;
+  }
+  .problem-list li strong { color: #92400E; }
+  .solution-list li {
     background: var(--accent-light);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    font-size: 15px;
     color: var(--accent);
-    font-size: 0.73rem;
-    font-weight: 600;
-    padding: 0.3em 0.7em;
-    border-radius: 4px;
-    letter-spacing: 0.02em;
+    line-height: 1.6;
   }
-
+  .solution-list li strong { color: var(--accent); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .problem-list li { background: #422006; color: #FCD34D; border-color: #92400E; }
+    :root:not([data-theme="light"]) .problem-list li strong { color: #FCD34D; }
+  }
+  :root[data-theme="dark"] .problem-list li { background: #422006; color: #FCD34D; border-color: #92400E; }
+  :root[data-theme="dark"] .problem-list li strong { color: #FCD34D; }
   .next-part {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-top: 2.5rem;
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-top: 32px;
   }
-
   .next-part h3 {
     margin-top: 0;
-    font-size: 1rem;
-    color: var(--fg-muted);
-    font-family: var(--font-body);
-    font-weight: 600;
-    letter-spacing: 0.03em;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
     text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--fg-muted);
   }
-
-  .next-part p {
-    margin-bottom: 0;
-    font-size: 0.92rem;
+  .next-part p { font-size: 15px; }
+  .sim-grid {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
   }
-
-  @media (max-width: 500px) {
-    .wrapper { padding-block: 0.5rem 3rem; }
-    h1 { font-size: 1.65rem; }
+  .sim-grid .sim-head {
+    padding: 8px 14px;
+    background: var(--bg-alt);
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--fg-muted);
+    border-bottom: 1px solid var(--border);
   }
+  .sim-grid .sim-cell {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--fg-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.3s, color 0.3s;
+  }
+  .sim-grid .sim-cell:nth-last-child(-n+3) { border-bottom: none; }
+  .sim-cell.ok { color: var(--accent); }
+  .sim-cell.fail { color: #EF4444; opacity: 0.6; }
+  .sim-cell.fixed { color: var(--accent); background: var(--accent-light); }
+  .sim-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .sim-controls label {
+    font-size: 13px;
+    color: var(--fg-secondary);
+    font-family: var(--font-heading);
+    font-weight: 500;
+  }
+  .sim-controls select {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--fg);
+  }
+  .sim-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .sim-toggle-track {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    background: var(--border-strong);
+    border-radius: 11px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .sim-toggle-track.on { background: var(--accent); }
+  .sim-toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .sim-toggle-track.on .sim-toggle-thumb { transform: translateX(18px); }
 </style>
 </head>
 <body>
 
-<a href="../" class="back-link">Home</a>
+<header class="site-header">
+  <div class="container">
+    <a href="../" class="site-logo">
+      <span class="logo-mark"><svg viewBox="0 0 16 16" fill="none"><circle cx="4" cy="4" r="2" fill="#fff"/><circle cx="12" cy="4" r="2" fill="#fff"/><circle cx="8" cy="12" r="2" fill="#fff"/><line x1="4" y1="4" x2="12" y2="4" stroke="#fff" stroke-width="1.2"/><line x1="4" y1="4" x2="8" y2="12" stroke="#fff" stroke-width="1.2"/><line x1="12" y1="4" x2="8" y2="12" stroke="#fff" stroke-width="1.2"/></svg></span>
+      Anurag Rai
+    </a>
+    <div class="header-right">
+      <nav class="site-nav">
+        <a href="../#articles">Articles</a>
+        <a href="../#tools">Tools</a>
+        <a href="../#about">About</a>
+      </nav>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
 
-<article class="wrapper">
+<div class="container">
+  <a href="../" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Home
+  </a>
 
-  <div class="series-label">The UOM Conundrum in IBP &middot; Part 1</div>
-
-  <h1>Meet ZPU: The One Dummy Record That Fixes Half Your UOM Problems in IBP</h1>
-
-  <p class="subtitle">The one interface record that shows up on every IBP project I've worked on. I gave it a nickname.</p>
-
-  <div class="byline">
-    <div class="byline-avatar">AR</div>
-    <div class="byline-info">
-      <strong>Anurag Rai</strong>
-      Published October 2026
+  <div class="article-hero">
+    <span class="article-kicker">The UOM Conundrum in IBP &middot; Part 1</span>
+    <h1>Meet ZPU: The One Dummy Record That Fixes Half Your UOM Problems in IBP</h1>
+    <p class="subtitle">The one interface record that shows up on every IBP project I've worked on. I gave it a nickname.</p>
+    <div class="article-meta">
+      <span class="author"><span class="avatar">AR</span> Anurag Rai</span>
+      <span class="sep">&middot;</span>
+      <span>Published October 2026</span>
     </div>
   </div>
 
-  <p>
-    Whatever IBP project you've worked on, you've hit this problem. And if you haven't yet, you will.
-  </p>
+  <div class="article-layout">
+    <article class="article-content">
 
-  <p>
-    Across 10+ SAP IBP implementations &mdash; different industries, different planning scopes &mdash; there's one dummy data interface that I have to create every single time. It's not glamorous. It doesn't appear in any SAP best-practice guide. But it quietly saves the project from a cascade of UOM-related headaches. I started calling it <span class="zpu-badge">ZPU</span>.
-  </p>
+      <p>Whatever IBP project you've worked on, you've hit this problem. And if you haven't yet, you will.</p>
 
-  <h2>The Problem Everyone Knows But Rarely Discussed</h2>
+      <p>Across 10+ SAP IBP implementations &mdash; different industries, different planning scopes &mdash; there's one dummy data interface that I have to create every single time. It's not glamorous. It doesn't appear in any SAP best-practice guide. But it quietly saves the project from a cascade of UOM-related headaches. I started calling it <span class="zpu-badge">ZPU</span>.</p>
 
-  <p>
-    If you've worked in IBP, you know this: <strong>when you open an Excel planning view, you can select only one Unit of Measure.</strong>
-  </p>
+      <h2 id="the-problem">The problem everyone knows but rarely discusses</h2>
 
-  <p>
-    One. Not two. Not "base UOM per product." One UOM for the entire planning view.
-  </p>
+      <p>If you've worked in IBP, you know this: <strong>when you open an Excel planning view, you can select only one Unit of Measure.</strong></p>
 
-  <p>
-    Now think about what that means in practice. Your planning area has hundreds &mdash; maybe thousands &mdash; of materials. Some are measured in <code>EA</code>. Others in <code>KG</code>. Others in <code>L</code>, <code>M</code>, <code>CS</code>, <code>PAL</code>. When you open the Excel view and pick <code>KG</code> as your unit, what happens to the products whose base UOM is <code>EA</code>?
-  </p>
+      <p>One. Not two. Not "base UOM per product." One UOM for the entire planning view.</p>
 
-  <p>
-    If the UOM conversion from <code>EA</code> to <code>KG</code> isn't maintained for that material &mdash; and why would it be, for a discrete electronic component? &mdash; the answer is: <strong>nothing</strong>. The cell is blank. The product vanishes from your planning view as if it doesn't exist.
-  </p>
+      <p>Now think about what that means in practice. Your planning area has hundreds &mdash; maybe thousands &mdash; of materials. Some are measured in <code>EA</code>. Others in <code>KG</code>. Others in <code>L</code>, <code>M</code>, <code>CS</code>, <code>PAL</code>. When you open the Excel view and pick <code>KG</code> as your unit, what happens to the products whose base UOM is <code>EA</code>?</p>
 
-  <div class="callout warn">
-    <div class="callout-label">The silent failure</div>
-    <p>IBP doesn't throw an error when it can't convert. It just shows an empty cell. Planners see gaps in their data and assume the numbers haven't been loaded yet. Nobody investigates, because there's no red flag &mdash; just an absence.</p>
+      <p>If the UOM conversion from <code>EA</code> to <code>KG</code> isn't maintained for that material &mdash; and why would it be, for a discrete electronic component? &mdash; the answer is: <strong>nothing</strong>. The cell is blank. The product vanishes from your planning view as if it doesn't exist.</p>
+
+      <div class="callout callout-warning">
+        <strong>The silent failure:</strong> IBP doesn't throw an error when it can't convert. It just shows an empty cell. Planners see gaps in their data and assume the numbers haven't been loaded yet. Nobody investigates, because there's no red flag &mdash; just an absence.
+      </div>
+
+      <p>And it gets worse. This single-UOM constraint doesn't just affect what planners see in Excel. It ripples through the entire planning process:</p>
+
+      <ul class="problem-list">
+        <li><strong>Statistical forecasting breaks.</strong> Forecast operators in IBP require a UOM selection. If the selected UOM can't be converted to for a product, that product simply gets no forecast. No error in the application job log &mdash; it just gets skipped.</li>
+        <li><strong>Copy operators and extracts fail silently.</strong> Copying actuals to a plan version or extracting data in a different UOM? Products without a valid conversion produce zero values or disappear entirely from the output.</li>
+        <li><strong>Disaggregation becomes a nightmare.</strong> When aggregate numbers need to break down to product level, IBP uses UOM conversion factors in the calculation. A missing or zero conversion factor doesn't just block the product &mdash; it can produce divide-by-zero errors that halt the entire disaggregation run.</li>
+      </ul>
+
+      <h2 id="the-fix">The fix: a dummy self-conversion record</h2>
+
+      <p>The solution is almost embarrassingly simple. Create a <strong>dummy unit of measure</strong> &mdash; I call it <span class="zpu-badge">ZPU</span> (Z for custom, PU for Planning Unit) &mdash; and maintain a self-conversion record for every product where <strong>1 Base UOM = 1 ZPU</strong>.</p>
+
+      <p>That's it. That's the trick.</p>
+
+      <table>
+        <thead>
+          <tr><th>Product</th><th>Base UOM</th><th>ZPU Conversion</th><th>What ZPU Represents</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Sensor Module A</td><td><code>EA</code></td><td>1 EA = 1 ZPU</td><td>1 piece</td></tr>
+          <tr><td>Polymer Resin X</td><td><code>KG</code></td><td>1 KG = 1 ZPU</td><td>1 kilogram</td></tr>
+          <tr><td>Coating Fluid Z</td><td><code>L</code></td><td>1 L = 1 ZPU</td><td>1 liter</td></tr>
+          <tr><td>Packaging Film R</td><td><code>M</code></td><td>1 M = 1 ZPU</td><td>1 meter</td></tr>
+          <tr><td>Beverage Can 330ml</td><td><code>CS</code></td><td>1 CS = 1 ZPU</td><td>1 case</td></tr>
+        </tbody>
+      </table>
+
+      <div class="widget">
+        <div class="widget-header">
+          <span class="dot"></span>
+          Interactive &mdash; ZPU conversion simulator
+        </div>
+        <div class="widget-body">
+          <div class="sim-controls">
+            <label>View UOM:</label>
+            <select id="simUom" onchange="updateSim()">
+              <option value="EA">EA (Each)</option>
+              <option value="KG">KG (Kilogram)</option>
+              <option value="L">L (Liter)</option>
+              <option value="ZPU" selected>ZPU (Planning Unit)</option>
+            </select>
+            <div class="sim-toggle">
+              <label>ZPU enabled</label>
+              <div class="sim-toggle-track on" id="zpuToggle" onclick="toggleZpu()">
+                <div class="sim-toggle-thumb"></div>
+              </div>
+            </div>
+          </div>
+          <div class="sim-grid" id="simGrid">
+            <div class="sim-head">Product</div>
+            <div class="sim-head">Base UOM</div>
+            <div class="sim-head">Value</div>
+          </div>
+          <p style="font-size:12px;color:var(--fg-muted);margin-top:10px;margin-bottom:0;">Toggle ZPU off and switch to KG to see products disappear from the view.</p>
+        </div>
+      </div>
+
+      <p><span class="zpu-badge">ZPU</span> doesn't represent a real physical unit. It's a <strong>pass-through</strong>. When you select ZPU as your UOM in a planning view, Excel template, operator, or data extract, every product converts successfully because every product has exactly one conversion: its own base UOM mapped 1:1 to ZPU.</p>
+
+      <p>The number you see is always the quantity in the product's own base unit. Sensor Module A shows 500 (meaning 500 EA). Polymer Resin X shows 2,000 (meaning 2,000 KG). They're in the same column, but each product is speaking its own language &mdash; and that's fine, because <strong>the planner already knows what unit each product is in</strong> or you can pull in Base UOM as attribute in the planning view.</p>
+
+      <div class="callout callout-info">
+        <strong>Why this works:</strong> The real insight is that planners don't actually need every product in the same physical unit. They need every product <em>visible in the same view</em>. ZPU gives them that without forcing a conversion that doesn't exist.
+      </div>
+
+      <h2 id="what-it-solves">What ZPU solves, concretely</h2>
+
+      <p>Once ZPU is in place and selected as the UOM across the board, the cascade of failures reverses:</p>
+
+      <ul class="solution-list">
+        <li><strong>Every product appears in the planning view.</strong> No more blank cells, no more phantom "missing data" investigations. The planner sees every product's quantity in its native unit.</li>
+        <li><strong>Statistical forecast runs completely.</strong> Select ZPU as the forecast operator's UOM, and every product gets a forecast. The algorithm works on the base-unit quantity, which is exactly what you want.</li>
+        <li><strong>Copy operators transfer all records.</strong> Copying actuals to plan, last year to this year, one version to another &mdash; all products come through because the conversion always resolves.</li>
+        <li><strong>Disaggregation works without divide-by-zero.</strong> The conversion factor is always 1, so the math is clean. No zero factors, no skipped products, no halted jobs.</li>
+        <li><strong>Interface extracts are complete.</strong> Extract in ZPU, and every product appears in the output. The downstream system receives the quantity in base UOM, which is what it expects anyway.</li>
+      </ul>
+
+      <h2 id="setup">Setting it up in IBP</h2>
+
+      <p>Setting it up is straightforward: create <code>ZPU</code> as a custom UOM (in IBP directly), maintain a <code>1 Base UOM = 1 ZPU</code> conversion record for every product in the UOM conversion table via MDM rule or via CIDS Dummy data interface for UOM Conversions.</p>
+
+      <p>Then configure your Excel templates, planning views, and operators to default to <code>ZPU</code>. Planners will see quantities in base UOM without having to think about which UOM to select. It becomes invisible &mdash; which is exactly what good infrastructure should be.</p>
+
+      <div class="callout callout-warning">
+        <strong>Don't skip this:</strong> The number one failure mode with ZPU is a new product that gets created without its conversion record. Set up a validation check &mdash; a periodic job that flags any product missing a ZPU conversion &mdash; and make it part of your data quality monitoring.
+      </div>
+
+      <h2 id="limitations">What ZPU doesn't solve</h2>
+
+      <p>ZPU is a technical fix for the single-UOM selection constraint. It makes sure every product shows up and every operator runs. But it does <strong>not</strong> make it meaningful to add 500 EA of sensors to 2,000 KG of resin. The numbers appear in the same column, but their sum is still nonsense.</p>
+
+      <p>For aggregate-level planning &mdash; S&amp;OP reviews, executive dashboards, portfolio-level demand shaping &mdash; you need a different approach. That's where revenue-based aggregation and UOM-group-based supply planning come in, which I'll cover in the next parts of this series.</p>
+
+      <p>But at the product level, for the day-to-day work of demand planners, supply planners, and integration engineers? <span class="zpu-badge">ZPU</span> is the most useful record you'll ever load into IBP.</p>
+
+      <p style="margin-top: 32px; font-style: italic; color: var(--fg-secondary);">Have you run into this problem on your IBP projects? Did you solve it differently? I'd love to hear &mdash; drop a comment or DM me.</p>
+
+      <div class="next-part">
+        <h3>Coming up next</h3>
+        <p><strong>Part 2:</strong> Why S&amp;OP aggregation should always be done at the revenue level &mdash; and how to design your IBP key figures for it.</p>
+        <p style="margin-top: 8px;"><strong>Part 3:</strong> Grouping supply planning by common base UOM &mdash; lessons from the beverages industry on bottling capacity planning and bulk procurement.</p>
+      </div>
+
+      <div class="article-tags">
+        <span>SAP IBP</span>
+        <span>UOM Conversion</span>
+        <span>Excel Planning View</span>
+        <span>Master Data</span>
+        <span>ZPU</span>
+        <span>Demand Planning</span>
+      </div>
+
+    </article>
+
+    <aside class="article-sidebar">
+      <nav class="toc">
+        <div class="toc-title">On this page</div>
+        <a href="#the-problem">The problem</a>
+        <a href="#the-fix">The fix: ZPU</a>
+        <a href="#what-it-solves">What it solves</a>
+        <a href="#setup">Setting it up</a>
+        <a href="#limitations">Limitations</a>
+      </nav>
+    </aside>
   </div>
+</div>
 
-  <p>
-    And it gets worse. This single-UOM constraint doesn't just affect what planners see in Excel. It ripples through the entire planning process:
-  </p>
-
-  <ul class="problem-list">
-    <li><strong>Statistical forecasting breaks.</strong> Forecast operators in IBP require a UOM selection. If the selected UOM can't be converted to for a product, that product simply gets no forecast. No error in the application job log &mdash; it just gets skipped.</li>
-    <li><strong>Copy operators and extracts fail silently.</strong> Copying actuals to a plan version or extracting data in a different UOM? Products without a valid conversion produce zero values or disappear entirely from the output.</li>
-    <li><strong>Disaggregation becomes a nightmare.</strong> When aggregate numbers need to break down to product level, IBP uses UOM conversion factors in the calculation. A missing or zero conversion factor doesn't just block the product &mdash; it can produce divide-by-zero errors that halt the entire disaggregation run.</li>
-  </ul>
-
-  <h2>The Fix: A Dummy Self-Conversion Record</h2>
-
-  <p>
-    The solution is almost embarrassingly simple. Create a <strong>dummy unit of measure</strong> &mdash; I call it <span class="zpu-badge">ZPU</span> (Z for custom, PU for Planning Unit) &mdash; and maintain a self-conversion record for every product where <strong>1 Base UOM = 1 ZPU</strong>.
-  </p>
-
-  <p>
-    That's it. That's the trick.
-  </p>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Base UOM</th>
-          <th>ZPU Conversion</th>
-          <th>What ZPU Represents</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Sensor Module A</td>
-          <td><code>EA</code></td>
-          <td>1 EA = 1 ZPU</td>
-          <td>1 piece</td>
-        </tr>
-        <tr>
-          <td>Polymer Resin X</td>
-          <td><code>KG</code></td>
-          <td>1 KG = 1 ZPU</td>
-          <td>1 kilogram</td>
-        </tr>
-        <tr>
-          <td>Coating Fluid Z</td>
-          <td><code>L</code></td>
-          <td>1 L = 1 ZPU</td>
-          <td>1 liter</td>
-        </tr>
-        <tr>
-          <td>Packaging Film R</td>
-          <td><code>M</code></td>
-          <td>1 M = 1 ZPU</td>
-          <td>1 meter</td>
-        </tr>
-        <tr>
-          <td>Beverage Can 330ml</td>
-          <td><code>CS</code></td>
-          <td>1 CS = 1 ZPU</td>
-          <td>1 case</td>
-        </tr>
-      </tbody>
-    </table>
+<footer class="site-footer">
+  <div class="container">
+    <p>&copy; 2026 Anurag Rai</p>
+    <div class="footer-links">
+      <a href="https://www.linkedin.com/in/anurag-rai-42561b7a/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/AnuragRaiSCMSolutions" target="_blank" rel="noopener">GitHub</a>
+    </div>
   </div>
+</footer>
 
-  <p>
-    <span class="zpu-badge">ZPU</span> doesn't represent a real physical unit. It's a <strong>pass-through</strong>. When you select ZPU as your UOM in a planning view, Excel template, operator, or data extract, every product converts successfully because every product has exactly one conversion: its own base UOM mapped 1:1 to ZPU.
-  </p>
+<script>
+function toggleTheme() {
+  const root = document.documentElement;
+  const current = root.getAttribute('data-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  let next;
+  if (!current) next = prefersDark ? 'light' : 'dark';
+  else if (current === 'dark') next = 'light';
+  else next = 'dark';
+  root.setAttribute('data-theme', next);
+  try { localStorage.setItem('theme', next); } catch(e) {}
+}
+try {
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+} catch(e) {}
 
-  <p>
-    The number you see is always the quantity in the product's own base unit. Sensor Module A shows 500 (meaning 500 EA). Polymer Resin X shows 2,000 (meaning 2,000 KG). They're in the same column, but each product is speaking its own language &mdash; and that's fine, because <strong>the planner already knows what unit each product is in</strong> or you can pull in Base UOM as attribute in the planning view.
-  </p>
+// TOC scroll spy
+const tocLinks = document.querySelectorAll('.toc a');
+const sections = Array.from(tocLinks).map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+function updateToc() {
+  let current = '';
+  for (const s of sections) {
+    if (s.getBoundingClientRect().top <= 120) current = s.id;
+  }
+  tocLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', updateToc, { passive: true });
+updateToc();
 
-  <div class="callout">
-    <div class="callout-label">Why this works</div>
-    <p>The real insight is that planners don't actually need every product in the same physical unit. They need every product <em>visible in the same view</em>. ZPU gives them that without forcing a conversion that doesn't exist.</p>
-  </div>
+// ZPU Conversion Simulator
+const products = [
+  { name: 'Sensor Module A', base: 'EA', qty: 500 },
+  { name: 'Polymer Resin X', base: 'KG', qty: 2000 },
+  { name: 'Coating Fluid Z', base: 'L', qty: 850 },
+  { name: 'Packaging Film R', base: 'M', qty: 3200 },
+  { name: 'Beverage Can 330ml', base: 'CS', qty: 1400 }
+];
+let zpuEnabled = true;
 
-  <h2>What ZPU Solves, Concretely</h2>
+function toggleZpu() {
+  zpuEnabled = !zpuEnabled;
+  const track = document.getElementById('zpuToggle');
+  track.classList.toggle('on', zpuEnabled);
+  updateSim();
+}
 
-  <p>
-    Once ZPU is in place and selected as the UOM across the board, the cascade of failures reverses:
-  </p>
-
-  <ul class="solution-list">
-    <li><strong>Every product appears in the planning view.</strong> No more blank cells, no more phantom "missing data" investigations. The planner sees every product's quantity in its native unit.</li>
-    <li><strong>Statistical forecast runs completely.</strong> Select ZPU as the forecast operator's UOM, and every product gets a forecast. The algorithm works on the base-unit quantity, which is exactly what you want.</li>
-    <li><strong>Copy operators transfer all records.</strong> Copying actuals to plan, last year to this year, one version to another &mdash; all products come through because the conversion always resolves.</li>
-    <li><strong>Disaggregation works without divide-by-zero.</strong> The conversion factor is always 1, so the math is clean. No zero factors, no skipped products, no halted jobs.</li>
-    <li><strong>Interface extracts are complete.</strong> Extract in ZPU, and every product appears in the output. The downstream system receives the quantity in base UOM, which is what it expects anyway.</li>
-  </ul>
-
-  <h2>Setting It Up in IBP</h2>
-
-  <p>
-    Setting it up is straightforward: create <code>ZPU</code> as a custom UOM (in IBP directly), maintain a <code>1 Base UOM = 1 ZPU</code> conversion record for every product in the UOM conversion table via MDM rule or via CIDS Dummy data interface for UOM Conversions.
-  </p>
-
-  <p>
-    Then configure your Excel templates, planning views, and operators to default to <code>ZPU</code>. Planners will see quantities in base UOM without having to think about which UOM to select. It becomes invisible &mdash; which is exactly what good infrastructure should be.
-  </p>
-
-  <div class="callout warn">
-    <div class="callout-label">Don't skip this</div>
-    <p>The number one failure mode with ZPU is a new product that gets created without its conversion record. Set up a validation check &mdash; a periodic job that flags any product missing a ZPU conversion &mdash; and make it part of your data quality monitoring. If it's missed, that product silently drops out of every view and operator that uses ZPU.</p>
-  </div>
-
-  <hr>
-
-  <h2>A Word on What ZPU Doesn't Solve</h2>
-
-  <p>
-    ZPU is a technical fix for the single-UOM selection constraint. It makes sure every product shows up and every operator runs. But it does <strong>not</strong> make it meaningful to add 500 EA of sensors to 2,000 KG of resin. The numbers appear in the same column, but their sum is still nonsense.
-  </p>
-
-  <p>
-    For aggregate-level planning &mdash; S&amp;OP reviews, executive dashboards, portfolio-level demand shaping &mdash; you need a different approach. That's where revenue-based aggregation and UOM-group-based supply planning come in, which I'll cover in the next parts of this series.
-  </p>
-
-  <p>
-    But at the product level, for the day-to-day work of demand planners, supply planners, and integration engineers? <span class="zpu-badge">ZPU</span> is the most useful record you'll ever load into IBP.
-  </p>
-
-  <p style="margin-top: 2.5rem; font-family: var(--font-display); font-size: 1.05rem; font-style: italic; color: var(--fg-secondary);">
-    Have you run into this problem on your IBP projects? Did you solve it differently? I'd love to hear &mdash; drop a comment or DM me.
-  </p>
-
-  <div class="next-part">
-    <h3>Coming up next</h3>
-    <p><strong>Part 2:</strong> Why S&amp;OP aggregation should always be done at the revenue level &mdash; and how to design your IBP key figures for it.</p>
-    <p style="margin-top: 0.5rem;"><strong>Part 3:</strong> Grouping supply planning by common base UOM &mdash; lessons from the beverages industry on bottling capacity planning and bulk procurement.</p>
-  </div>
-
-  <div class="tags">
-    <span class="tag">SAP IBP</span>
-    <span class="tag">UOM Conversion</span>
-    <span class="tag">Excel Planning View</span>
-    <span class="tag">Master Data</span>
-    <span class="tag">ZPU</span>
-    <span class="tag">Demand Planning</span>
-  </div>
-
-</article>
+function updateSim() {
+  const uom = document.getElementById('simUom').value;
+  const grid = document.getElementById('simGrid');
+  let html = '<div class="sim-head">Product</div><div class="sim-head">Base UOM</div><div class="sim-head">Value</div>';
+  for (const p of products) {
+    const canConvert = (uom === p.base) || (uom === 'ZPU' && zpuEnabled);
+    const cls = canConvert ? (uom === 'ZPU' ? 'fixed' : 'ok') : 'fail';
+    const val = canConvert ? p.qty.toLocaleString() + ' ' + (uom === 'ZPU' ? p.base : uom) : '—';
+    html += `<div class="sim-cell">${p.name}</div>`;
+    html += `<div class="sim-cell" style="font-family:var(--font-mono);font-size:13px">${p.base}</div>`;
+    html += `<div class="sim-cell ${cls}" style="font-family:var(--font-mono);font-size:13px">${val}</div>`;
+  }
+  grid.innerHTML = html;
+}
+updateSim();
+</script>
 
 </body>
 </html>

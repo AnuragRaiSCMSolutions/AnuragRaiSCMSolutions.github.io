@@ -5,52 +5,131 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Anurag Rai — SAP IBP &amp; Supply Chain Transformation</title>
   <meta name="description" content="Supply Chain Transformation & Consulting Leader. 12+ years, 10+ SAP IBP programs. Original articles, open-source tools, and practitioner insights.">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Nunito+Sans:wght@400;600&family=Fira+Code:wght@400&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
   <header class="site-header">
     <div class="container">
-      <a href="/" class="site-logo">Anurag Rai</a>
-      <nav class="site-nav">
-        <a href="#articles">Articles</a>
-        <a href="#tools">Tools</a>
-        <a href="#about">About</a>
-      </nav>
+      <a href="/" class="site-logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="4" cy="4" r="2" fill="#fff"/>
+            <circle cx="12" cy="4" r="2" fill="#fff"/>
+            <circle cx="8" cy="12" r="2" fill="#fff"/>
+            <line x1="4" y1="4" x2="12" y2="4" stroke="#fff" stroke-width="1.2"/>
+            <line x1="4" y1="4" x2="8" y2="12" stroke="#fff" stroke-width="1.2"/>
+            <line x1="12" y1="4" x2="8" y2="12" stroke="#fff" stroke-width="1.2"/>
+          </svg>
+        </span>
+        Anurag Rai
+      </a>
+      <div class="header-right">
+        <nav class="site-nav">
+          <a href="#articles">Articles</a>
+          <a href="#tools">Tools</a>
+          <a href="#about">About</a>
+        </nav>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
     </div>
   </header>
 
   <section class="hero">
     <div class="container">
-      <p class="hero-label">SAP IBP &middot; Supply Chain Transformation &middot; AI-Enabled Planning</p>
+      <p class="hero-label">// SAP IBP &middot; Supply Chain Transformation &middot; AI-Enabled Planning</p>
       <h1>Anurag Rai</h1>
       <p class="hero-tagline">
-        <span>Driven to Innovate.</span>
+        Driven to Innovate.
         <span class="accent">Disciplined to Deliver.</span>
-        <span>Dedicated to Client Success.</span>
+        Dedicated to Client Success.
       </p>
-      <p class="hero-sub">Supply Chain Transformation &amp; Consulting Leader with 12+ years and 10+ SAP IBP programs across industries and geographies. I write about the problems practitioners actually face — and the solutions that work.</p>
+      <p class="hero-sub">Supply Chain Transformation &amp; Consulting Leader with 12+ years and 10+ SAP IBP programs across industries and geographies. I write about the problems practitioners actually face — and build tools for the solutions that work.</p>
     </div>
   </section>
 
   <section id="articles" class="section">
     <div class="container">
-      <h2>Articles</h2>
-      <div class="card-grid">
+      <div class="section-header">
+        <h2>Articles</h2>
+        <span class="section-count">02 published</span>
+      </div>
+      <div class="card-grid card-grid-2">
 
         <a href="articles/zpu-uom-conundrum.html" class="card">
-          <span class="card-tag">SAP IBP</span>
-          <h3>Meet ZPU: The One Dummy Record That Fixes Half Your UOM Problems in IBP</h3>
-          <p>One UOM per planning view. Products vanish. Forecasts skip. No error. Just blank cells. The fix? A dummy self-conversion record I call ZPU.</p>
-          <span class="card-meta">Part 1 of The UOM Conundrum</span>
+          <div class="card-preview">
+            <svg viewBox="0 0 480 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="40" y="30" width="90" height="36" rx="6" fill="var(--accent)" fill-opacity="0.15" stroke="var(--accent)" stroke-width="0.5" stroke-opacity="0.4"/>
+              <text x="85" y="52" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="11" opacity="0.9">EA → KG</text>
+              <rect x="160" y="30" width="90" height="36" rx="6" fill="var(--accent)" fill-opacity="0.15" stroke="var(--accent)" stroke-width="0.5" stroke-opacity="0.4"/>
+              <text x="205" y="52" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="11" opacity="0.9">KG → L</text>
+              <rect x="280" y="30" width="90" height="36" rx="6" fill="var(--fg-muted)" fill-opacity="0.1" stroke="var(--fg-muted)" stroke-width="0.5" stroke-opacity="0.3"/>
+              <text x="325" y="48" text-anchor="middle" fill="var(--fg-muted)" font-family="var(--font-mono)" font-size="11" opacity="0.5">???</text>
+              <text x="325" y="60" text-anchor="middle" fill="var(--fg-muted)" font-family="var(--font-mono)" font-size="9" opacity="0.4">no path</text>
+              <rect x="40" y="95" width="330" height="36" rx="6" fill="var(--accent)" fill-opacity="0.08" stroke="var(--accent)" stroke-width="0.5" stroke-opacity="0.3"/>
+              <text x="65" y="117" fill="var(--accent)" font-family="var(--font-mono)" font-size="11" opacity="0.8">+ ZPU</text>
+              <line x1="100" y1="113" x2="350" y2="113" stroke="var(--accent)" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.4"/>
+              <circle cx="120" cy="113" r="3" fill="var(--accent)" opacity="0.6"/>
+              <circle cx="200" cy="113" r="3" fill="var(--accent)" opacity="0.6"/>
+              <circle cx="280" cy="113" r="3" fill="var(--accent)" opacity="0.6"/>
+              <text x="355" y="117" fill="var(--accent)" font-family="var(--font-mono)" font-size="10" opacity="0.6">all resolved</text>
+            </svg>
+          </div>
+          <div class="card-body">
+            <span class="card-tag tag-sap">SAP IBP</span>
+            <h3>Meet ZPU: The One Dummy Record That Fixes Half Your UOM Problems in IBP</h3>
+            <p>One UOM per planning view. Products vanish. Forecasts skip. No error. Just blank cells. The fix? A dummy self-conversion record I call ZPU.</p>
+            <div class="card-meta">
+              <span>Part 1 of 3</span>
+              <span class="card-meta-dot"></span>
+              <span>The UOM Conundrum</span>
+            </div>
+          </div>
         </a>
 
         <a href="articles/time-profiles.html" class="card">
-          <span class="card-tag">SAP IBP</span>
-          <h3>Getting the Time Profile Right: Why It Matters and How to Make It Easier</h3>
-          <p>Technical weeks, retail fiscal calendars, leap week handling — the configuration step every IBP implementation starts with, and the one most prone to rework.</p>
-          <span class="card-meta">With open-source tool</span>
+          <div class="card-preview">
+            <svg viewBox="0 0 480 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g opacity="0.7">
+                <rect x="40" y="25" width="50" height="110" rx="4" fill="var(--accent-secondary)" fill-opacity="0.08" stroke="var(--accent-secondary)" stroke-width="0.5" stroke-opacity="0.3"/>
+                <text x="65" y="18" text-anchor="middle" fill="var(--fg-muted)" font-family="var(--font-mono)" font-size="9">FY</text>
+                <rect x="50" y="35" width="30" height="45" rx="3" fill="var(--accent-secondary)" fill-opacity="0.15" stroke="var(--accent-secondary)" stroke-width="0.5" stroke-opacity="0.3"/>
+                <text x="65" y="60" text-anchor="middle" fill="var(--accent-secondary)" font-family="var(--font-mono)" font-size="9">Q1</text>
+                <rect x="50" y="85" width="30" height="45" rx="3" fill="var(--accent-secondary)" fill-opacity="0.1" stroke="var(--accent-secondary)" stroke-width="0.5" stroke-opacity="0.2"/>
+                <text x="65" y="110" text-anchor="middle" fill="var(--accent-secondary)" font-family="var(--font-mono)" font-size="9">Q2</text>
+              </g>
+              <g opacity="0.8">
+                <rect x="120" y="35" width="250" height="18" rx="3" fill="var(--accent)" fill-opacity="0.12"/>
+                <rect x="120" y="35" width="60" height="18" rx="3" fill="var(--accent)" fill-opacity="0.25"/>
+                <text x="150" y="48" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="9">4 wk</text>
+                <rect x="183" y="35" width="60" height="18" rx="3" fill="var(--accent)" fill-opacity="0.2"/>
+                <text x="213" y="48" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="9">4 wk</text>
+                <rect x="246" y="35" width="75" height="18" rx="3" fill="var(--accent)" fill-opacity="0.15"/>
+                <text x="283" y="48" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="9">5 wk</text>
+              </g>
+              <g opacity="0.5">
+                <line x1="120" y1="70" x2="370" y2="70" stroke="var(--border)" stroke-width="0.5"/>
+                <rect x="120" y="80" width="250" height="12" rx="2" fill="var(--fg-muted)" fill-opacity="0.06"/>
+                <rect x="120" y="80" width="18" height="12" rx="2" fill="var(--accent)" fill-opacity="0.3"/>
+                <rect x="140" y="80" width="18" height="12" rx="2" fill="var(--accent)" fill-opacity="0.25"/>
+                <rect x="160" y="80" width="18" height="12" rx="2" fill="var(--accent)" fill-opacity="0.2"/>
+                <rect x="180" y="80" width="18" height="12" rx="2" fill="var(--accent)" fill-opacity="0.15"/>
+              </g>
+              <text x="120" y="115" fill="var(--fg-muted)" font-family="var(--font-mono)" font-size="9" opacity="0.5">Day → TechWeek → Week → Month → Quarter → Year</text>
+            </svg>
+          </div>
+          <div class="card-body">
+            <span class="card-tag tag-sap">SAP IBP</span>
+            <h3>Getting the Time Profile Right: Why It Matters and How to Make It Easier</h3>
+            <p>Technical weeks, retail fiscal calendars, leap week handling — the configuration step every IBP implementation starts with, and the one most prone to rework.</p>
+            <div class="card-meta">
+              <span>With open-source tool</span>
+            </div>
+          </div>
         </a>
 
       </div>
@@ -59,14 +138,33 @@
 
   <section id="tools" class="section section-alt">
     <div class="container">
-      <h2>Tools</h2>
+      <div class="section-header">
+        <h2>Tools</h2>
+        <span class="section-count">01 available</span>
+      </div>
       <div class="card-grid">
 
-        <a href="tools/time-profile-generator.html" class="card card-tool">
-          <span class="card-tag tag-tool">Open Source</span>
-          <h3>IBP Time Profile Generator</h3>
-          <p>Generate SAP IBP time profiles directly in your browser. Supports Gregorian and retail fiscal calendars (4-4-5, 4-5-4, 5-4-4), custom week starts, technical week splits, and automatic leap week handling.</p>
-          <span class="card-meta">No installation &middot; Runs in browser &middot; CSV export</span>
+        <a href="tools/time-profile-generator.html" class="card" style="max-width: 540px;">
+          <div class="card-preview" style="background: var(--accent-light);">
+            <svg viewBox="0 0 540 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <text x="270" y="60" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="28" font-weight="700" opacity="0.25">&gt;_</text>
+              <text x="270" y="90" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="12" opacity="0.5">generate → preview → export CSV</text>
+              <rect x="160" y="105" width="220" height="28" rx="6" fill="var(--accent)" fill-opacity="0.12" stroke="var(--accent)" stroke-width="0.5" stroke-opacity="0.3"/>
+              <text x="270" y="123" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="11" opacity="0.7">time_profile_2026.csv</text>
+            </svg>
+          </div>
+          <div class="card-body">
+            <span class="card-tag tag-tool">Open Source</span>
+            <h3>IBP Time Profile Generator</h3>
+            <p>Generate SAP IBP time profiles directly in your browser. Supports Gregorian and retail fiscal calendars (4-4-5, 4-5-4, 5-4-4), custom week starts, technical week splits, and automatic leap week handling.</p>
+            <div class="card-meta">
+              <span>No installation</span>
+              <span class="card-meta-dot"></span>
+              <span>Runs in browser</span>
+              <span class="card-meta-dot"></span>
+              <span>CSV export</span>
+            </div>
+          </div>
         </a>
 
       </div>
@@ -75,14 +173,22 @@
 
   <section id="about" class="section">
     <div class="container">
-      <h2>About</h2>
+      <div class="section-header">
+        <h2>About</h2>
+      </div>
       <div class="about-content">
-        <p>I help global enterprises transform their supply chain planning with SAP IBP — and when the platform doesn't offer a standard solution, I design one.</p>
+        <p>I help global enterprises transform their supply chain planning with SAP IBP — and when the platform doesn't offer a standard solution, <strong>I design one</strong>.</p>
         <p>Over 12+ years and 10+ SAP IBP programs across manufacturing, retail, mining, and CPG, I've led cross-functional teams through complex transformations spanning demand planning, S&amp;OP, inventory optimization, and response &amp; supply.</p>
         <p>This site is where I share the practitioner-level knowledge that doesn't fit in a product manual — real problems, real solutions, and open-source tools built from project experience.</p>
         <div class="connect-links">
-          <a href="https://www.linkedin.com/in/anurag-rai-42561b7a/" target="_blank" rel="noopener" class="connect-btn">LinkedIn</a>
-          <a href="https://github.com/AnuragRaiSCMSolutions" target="_blank" rel="noopener" class="connect-btn">GitHub</a>
+          <a href="https://www.linkedin.com/in/anurag-rai-42561b7a/" target="_blank" rel="noopener" class="connect-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </a>
+          <a href="https://github.com/AnuragRaiSCMSolutions" target="_blank" rel="noopener" class="connect-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            GitHub
+          </a>
         </div>
       </div>
     </div>
@@ -91,8 +197,34 @@
   <footer class="site-footer">
     <div class="container">
       <p>&copy; 2026 Anurag Rai. Built with care, hosted on GitHub Pages.</p>
+      <div class="footer-links">
+        <a href="https://www.linkedin.com/in/anurag-rai-42561b7a/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://github.com/AnuragRaiSCMSolutions" target="_blank" rel="noopener">GitHub</a>
+      </div>
     </div>
   </footer>
+
+  <script>
+    function toggleTheme() {
+      const root = document.documentElement;
+      const current = root.getAttribute('data-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      let next;
+      if (!current) {
+        next = prefersDark ? 'light' : 'dark';
+      } else if (current === 'dark') {
+        next = 'light';
+      } else {
+        next = 'dark';
+      }
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch(e) {}
+    }
+    try {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    } catch(e) {}
+  </script>
 
 </body>
 </html>
