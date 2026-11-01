@@ -227,6 +227,53 @@
   }
   .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
+  .mismatch-banner {
+    background: color-mix(in srgb, #f59e0b 10%, var(--bg));
+    border: 1px solid color-mix(in srgb, #f59e0b 40%, transparent);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-top: 12px;
+    display: none;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .mismatch-banner.visible { display: block; }
+  .mismatch-banner .mismatch-title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    color: #d97706;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .mismatch-banner .mismatch-title { color: #fbbf24; }
+  }
+  :root[data-theme="dark"] .mismatch-banner .mismatch-title { color: #fbbf24; }
+  .mismatch-banner .mismatch-msg { color: var(--fg-muted); margin-bottom: 12px; }
+  .mismatch-banner .mismatch-msg strong { color: var(--fg); }
+  .mismatch-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .mismatch-actions button {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .mismatch-actions button:hover { opacity: 0.85; }
+  .mismatch-actions .btn-shift {
+    background: var(--accent);
+    color: #fff;
+  }
+  .mismatch-actions .btn-dismiss {
+    background: color-mix(in srgb, var(--fg) 10%, transparent);
+    color: var(--fg);
+  }
+
   @media (max-width: 640px) {
     .tool-hero h1 { font-size: 22px; }
     .config-grid { grid-template-columns: 1fr 1fr; }
@@ -314,6 +361,17 @@
         </div>
       </div>
       <button class="btn btn-generate" id="generateBtn">Generate Time Periods</button>
+      <div class="mismatch-banner" id="mismatchBanner">
+        <div class="mismatch-title">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 11a1 1 0 110-2 1 1 0 010 2zm1-4a1 1 0 01-2 0V5a1 1 0 112 0v3z"/></svg>
+          Week start mismatch
+        </div>
+        <div class="mismatch-msg" id="mismatchMsg"></div>
+        <div class="mismatch-actions">
+          <button class="btn-shift" id="shiftBtn"></button>
+          <button class="btn-dismiss" id="dismissMismatch">I'll adjust manually</button>
+        </div>
+      </div>
     </section>
 
     <details class="process-info">
@@ -479,13 +537,34 @@ function renderTable(data){
 function updateView(){const filtered=getFilteredData();renderTable(filtered);const total=allData.length,shown=filtered.length;$id('rowCount').textContent=activeFilter==='all'?`${total.toLocaleString()} rows`:`${shown.toLocaleString()} of ${total.toLocaleString()} rows`;}
 function renderSummary(){const counts={};allData.forEach(r=>{counts[r.level]=(counts[r.level]||0)+1;});$id('summaryBar').innerHTML=Object.entries(TYPE_NAMES).map(([lvl,name])=>{const c=counts[lvl]||0;return `<span class="summary-chip"><strong>${c.toLocaleString()}</strong> ${name}${c!==1?'s':''}</span>`;}).join('');}
 
+function hideMismatch(){$id('mismatchBanner').classList.remove('visible');}
+
+function nearestMatchingDay(start,targetDay){
+  const current=weekdayMon1(start);
+  if(current===targetDay)return null;
+  const back=(current-targetDay+7)%7,fwd=(targetDay-current+7)%7;
+  return fwd<=back?addDays(start,fwd):addDays(start,-back);
+}
+
+function showMismatchBanner(start,weekStart){
+  const DAY_LABELS={1:'Monday',2:'Tuesday',3:'Wednesday',4:'Thursday',5:'Friday',6:'Saturday',7:'Sunday'};
+  const nearest=nearestMatchingDay(start,weekStart);
+  const currentDay=DAY_LABELS[weekdayMon1(start)],targetDay=DAY_LABELS[weekStart];
+  $id('mismatchMsg').innerHTML=`Start date <strong>${fmtDate(start)}</strong> falls on <strong>${currentDay}</strong>, but fiscal week start is set to <strong>${targetDay}</strong>. Fiscal weeks require the start date to fall on the week start day.`;
+  $id('shiftBtn').textContent=`Shift to ${fmtDate(nearest)} (${targetDay})`;
+  $id('shiftBtn').onclick=function(){$id('startDate').value=fmtDate(nearest);updateDayOnStart();hideMismatch();generate();};
+  $id('mismatchBanner').classList.add('visible');
+}
+
 function generate(){
+  hideMismatch();
   const startStr=$id('startDate').value,endStr=$id('endDate').value,weekStart=parseInt($id('weekStart').value);
   if(!startStr||!endStr){showToast('Select both dates');return;}
   const start=parseDate(startStr),end=parseDate(endStr);
   if(end<start){showToast('End must be after start');return;}
   if(daysDiff(start,end)>20000){showToast('Range too large (max ~55 years)');return;}
   const calType=document.querySelector('input[name="calType"]:checked').value;
+  if(calType==='fiscal'&&weekdayMon1(start)!==weekStart){showMismatchBanner(start,weekStart);return;}
   if(calType==='fiscal'){allData=generateFiscalCalendar(start,end,weekStart,$id('fiscalPattern').value,$id('fiscalPrefix').value.trim());}
   else{allData=[...generateDays(start,end),...generateTechWeeks(start,end,weekStart),...generateWeeks(start,end),...generateMonths(start,end),...generateQuarters(start,end),...generateFiscalYears(start,end)];}
   activeFilter='all';document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.level==='all'));
@@ -498,6 +577,7 @@ function copyCSV(){try{navigator.clipboard.writeText(buildCSV(allData)).then(()=
 $id('startDate').addEventListener('change',updateDayOnStart);
 document.querySelectorAll('input[name="calType"]').forEach(radio=>{radio.addEventListener('change',()=>{const isFiscal=document.querySelector('input[name="calType"]:checked').value==='fiscal';document.querySelectorAll('.fiscal-opt').forEach(el=>el.hidden=!isFiscal);});});
 $id('generateBtn').addEventListener('click',generate);
+$id('dismissMismatch').addEventListener('click',hideMismatch);
 $id('downloadBtn').addEventListener('click',downloadCSV);
 $id('copyBtn').addEventListener('click',copyCSV);
 $id('tabs').addEventListener('click',e=>{const tab=e.target.closest('.tab');if(!tab)return;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');activeFilter=tab.dataset.level;updateView();});
