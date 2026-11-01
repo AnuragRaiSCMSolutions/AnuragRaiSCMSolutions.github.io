@@ -71,6 +71,8 @@
     color: var(--fg-muted);
   }
   .next-part p { font-size: 15px; }
+
+  /* ── Interactive simulator ── */
   .sim-grid {
     display: grid;
     grid-template-columns: 1fr auto auto;
@@ -153,6 +155,319 @@
     transition: transform 0.2s;
   }
   .sim-toggle-track.on .sim-toggle-thumb { transform: translateX(18px); }
+
+  /* ── Diagram: The Problem table ── */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .diagram-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .diagram-subtitle {
+    font-size: 13px;
+    color: var(--fg-muted);
+    margin-bottom: 16px;
+  }
+  .ibp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 480px;
+  }
+  .ibp-table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--fg-secondary);
+  }
+  .ibp-uom-badge {
+    background: #EF4444;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .ibp-table th {
+    background: var(--bg-alt);
+    padding: 8px 12px;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .ibp-table td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .ibp-table tr.ok td { color: var(--fg); }
+  .ibp-table tr.ok td:first-child { color: var(--accent); font-weight: 500; }
+  .ibp-table tr.missing td { color: var(--fg-muted); }
+  .ibp-table tr.missing td:first-child { color: #EF4444; }
+  .ibp-table .ibp-status-ok {
+    color: var(--accent);
+    font-size: 11px;
+    font-family: var(--font-mono);
+  }
+  .ibp-table .ibp-status-fail {
+    color: #EF4444;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    font-style: italic;
+  }
+  .ibp-footnote {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: color-mix(in srgb, #EF4444 8%, transparent);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: #EF4444;
+    border: 1px solid color-mix(in srgb, #EF4444 20%, transparent);
+  }
+
+  /* ── Diagram: Cascade flowchart ── */
+  .cascade-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .cascade-node {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 20px;
+    font-size: 13px;
+    text-align: center;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    max-width: 340px;
+    width: 100%;
+  }
+  .cascade-node.trigger {
+    background: color-mix(in srgb, #EF4444 10%, var(--surface));
+    border-color: #EF4444;
+    color: #EF4444;
+  }
+  .cascade-node.mid {
+    background: color-mix(in srgb, #F59E0B 10%, var(--surface));
+    border-color: #F59E0B;
+    color: #B45309;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .cascade-node.mid { color: #FCD34D; }
+  }
+  :root[data-theme="dark"] .cascade-node.mid { color: #FCD34D; }
+  .cascade-arrow {
+    width: 2px;
+    height: 20px;
+    background: var(--border-strong);
+    position: relative;
+  }
+  .cascade-arrow::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: -3px;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--border-strong);
+  }
+  .cascade-effects {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    max-width: 520px;
+  }
+  @media (max-width: 600px) { .cascade-effects { grid-template-columns: 1fr; } }
+  .cascade-effect {
+    background: var(--surface);
+    border: 1px solid #EF4444;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .cascade-effect strong {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 13px;
+    color: #EF4444;
+    margin-bottom: 2px;
+  }
+  .cascade-effect span {
+    color: var(--fg-muted);
+    font-size: 11px;
+  }
+  .cascade-spread {
+    width: 100%;
+    max-width: 520px;
+    height: 24px;
+    position: relative;
+  }
+  .cascade-spread::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 10px;
+    background: var(--border-strong);
+    transform: translateX(-50%);
+  }
+  .cascade-spread::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: var(--border-strong);
+  }
+
+  /* ── Diagram: ZPU mapping ── */
+  .zpu-map {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .zpu-map-products {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .zpu-map-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    background: var(--bg-alt);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .zpu-map-item .uom-chip {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--accent-secondary) 15%, transparent);
+    color: var(--accent-secondary);
+  }
+  .zpu-map-arrows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+  .zpu-map-arrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .zpu-map-arrow::after {
+    content: '→';
+    color: var(--accent);
+    font-size: 14px;
+  }
+  .zpu-map-target {
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 20px 28px;
+    text-align: center;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.05em;
+    min-width: 100px;
+  }
+  .zpu-map-target small {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.8;
+    margin-top: 2px;
+    letter-spacing: 0;
+  }
+
+  /* ── Diagram: Before / After ── */
+  .ba-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 600px) { .ba-grid { grid-template-columns: 1fr; } }
+  .ba-panel {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .ba-panel-head {
+    padding: 8px 14px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ba-panel.fail .ba-panel-head { background: color-mix(in srgb, #EF4444 10%, var(--surface)); color: #EF4444; border-bottom: 1px solid color-mix(in srgb, #EF4444 25%, var(--border)); }
+  .ba-panel.pass .ba-panel-head { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); color: var(--accent); border-bottom: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border)); }
+  .ba-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ba-row:last-child { border-bottom: none; }
+  .ba-row .name { font-family: var(--font-heading); font-weight: 500; }
+  .ba-row .val { font-family: var(--font-mono); font-size: 12px; }
+  .ba-panel.fail .ba-row .val.blank { color: #EF4444; font-style: italic; }
+  .ba-panel.pass .ba-row .val { color: var(--accent); }
+  .ba-footer {
+    padding: 8px 14px;
+    font-size: 11px;
+    border-top: 1px solid var(--border);
+  }
+  .ba-panel.fail .ba-footer { background: color-mix(in srgb, #EF4444 6%, var(--surface)); color: #EF4444; }
+  .ba-panel.pass .ba-footer { background: color-mix(in srgb, var(--accent) 6%, var(--surface)); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -166,7 +481,6 @@
     <div class="header-right">
       <nav class="site-nav">
         <a href="../#articles">Articles</a>
-        <a href="../#tools">Tools</a>
         <a href="../#about">About</a>
       </nav>
       <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
@@ -185,7 +499,7 @@
 
   <div class="article-hero">
     <span class="article-kicker">The UOM Conundrum in IBP &middot; Part 1</span>
-    <h1>Meet ZPU: The One Dummy Record That Fixes Half Your UOM Problems in IBP</h1>
+    <h1>Meet ZPU: The One Dummy Record That Fixes Half Your UOM Problems in SAP IBP</h1>
     <p class="subtitle">The one interface record that shows up on every IBP project I've worked on. I gave it a nickname.</p>
     <div class="article-meta">
       <span class="author"><span class="avatar">AR</span> Anurag Rai</span>
@@ -215,6 +529,31 @@
         <strong>The silent failure:</strong> IBP doesn't throw an error when it can't convert. It just shows an empty cell. Planners see gaps in their data and assume the numbers haven't been loaded yet. Nobody investigates, because there's no red flag &mdash; just an absence.
       </div>
 
+      <!-- Diagram: The Problem table (from Slide 2) -->
+      <div class="diagram">
+        <div class="diagram-title">The Problem: One UOM Per Planning View</div>
+        <div class="diagram-subtitle">When KG is selected, products without a KG conversion disappear</div>
+        <div style="overflow-x:auto">
+          <div class="ibp-table-header">
+            <span>IBP Excel Planning View</span>
+            <span>Display UOM: <span class="ibp-uom-badge">KG</span></span>
+          </div>
+          <table class="ibp-table">
+            <thead>
+              <tr><th>Product</th><th>Base UOM</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr class="ok"><td>Polymer Resin X</td><td>KG</td><td>2,400</td><td>2,150</td><td>2,800</td><td><span class="ibp-status-ok">OK</span></td></tr>
+              <tr class="ok"><td>Chemical Blend Y</td><td>KG</td><td>1,050</td><td>980</td><td>1,120</td><td><span class="ibp-status-ok">OK</span></td></tr>
+              <tr class="missing"><td>Sensor Module A</td><td>EA</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><span class="ibp-status-fail">No conversion</span></td></tr>
+              <tr class="missing"><td>Coating Fluid Z</td><td>L</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><span class="ibp-status-fail">No conversion</span></td></tr>
+              <tr class="missing"><td>Packaging Film R</td><td>M</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><span class="ibp-status-fail">No conversion</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ibp-footnote">Selected UOM is <strong>KG</strong>. Products with base UOM EA, L, and M have no conversion &mdash; their data is invisible. No error raised.</div>
+      </div>
+
       <p>And it gets worse. This single-UOM constraint doesn't just affect what planners see in Excel. It ripples through the entire planning process:</p>
 
       <ul class="problem-list">
@@ -223,11 +562,52 @@
         <li><strong>Disaggregation becomes a nightmare.</strong> When aggregate numbers need to break down to product level, IBP uses UOM conversion factors in the calculation. A missing or zero conversion factor doesn't just block the product &mdash; it can produce divide-by-zero errors that halt the entire disaggregation run.</li>
       </ul>
 
+      <!-- Diagram: Cascade of Silent Failures (from Slide 3) -->
+      <div class="diagram">
+        <div class="diagram-title">The Cascade of Silent Failures</div>
+        <div class="diagram-subtitle">A single UOM constraint ripples through the entire planning process</div>
+        <div class="cascade-flow">
+          <div class="cascade-node trigger">Single UOM selection in Excel planning view</div>
+          <div class="cascade-arrow"></div>
+          <div class="cascade-node mid">Products without conversion to selected UOM</div>
+          <div class="cascade-spread"></div>
+          <div class="cascade-effects">
+            <div class="cascade-effect"><strong>Blank cells in planning view</strong><span>Planner assumes data not loaded</span></div>
+            <div class="cascade-effect"><strong>Forecast operator skips product</strong><span>No forecast generated</span></div>
+            <div class="cascade-effect"><strong>Copy operator produces zeros</strong><span>Plan version has gaps</span></div>
+            <div class="cascade-effect"><strong>Disaggregation hits divide-by-zero</strong><span>Entire job halts</span></div>
+          </div>
+        </div>
+      </div>
+
       <h2 id="the-fix">The fix: a dummy self-conversion record</h2>
 
       <p>The solution is almost embarrassingly simple. Create a <strong>dummy unit of measure</strong> &mdash; I call it <span class="zpu-badge">ZPU</span> (Z for custom, PU for Planning Unit) &mdash; and maintain a self-conversion record for every product where <strong>1 Base UOM = 1 ZPU</strong>.</p>
 
       <p>That's it. That's the trick.</p>
+
+      <!-- Diagram: The Fix — ZPU mapping (from Slide 4) -->
+      <div class="diagram">
+        <div class="diagram-title">The Fix: ZPU (Zero-conversion Planning Unit)</div>
+        <div class="diagram-subtitle">A 1:1 self-conversion record for every product's base UOM</div>
+        <div class="zpu-map">
+          <div class="zpu-map-products">
+            <div class="zpu-map-item">Sensor Module A <span class="uom-chip">EA</span></div>
+            <div class="zpu-map-item">Polymer Resin X <span class="uom-chip">KG</span></div>
+            <div class="zpu-map-item">Coating Fluid Z <span class="uom-chip">L</span></div>
+            <div class="zpu-map-item">Packaging Film R <span class="uom-chip">M</span></div>
+            <div class="zpu-map-item">Beverage Can 330ml <span class="uom-chip">CS</span></div>
+          </div>
+          <div class="zpu-map-arrows">
+            <div class="zpu-map-arrow">1 EA = 1 ZPU</div>
+            <div class="zpu-map-arrow">1 KG = 1 ZPU</div>
+            <div class="zpu-map-arrow">1 L = 1 ZPU</div>
+            <div class="zpu-map-arrow">1 M = 1 ZPU</div>
+            <div class="zpu-map-arrow">1 CS = 1 ZPU</div>
+          </div>
+          <div class="zpu-map-target">ZPU<small>Zero-conversion Planning Unit</small></div>
+        </div>
+      </div>
 
       <table>
         <thead>
@@ -284,6 +664,32 @@
 
       <p>Once ZPU is in place and selected as the UOM across the board, the cascade of failures reverses:</p>
 
+      <!-- Diagram: Before and After ZPU (from Slide 5) -->
+      <div class="diagram">
+        <div class="diagram-title">Before and After ZPU</div>
+        <div class="diagram-subtitle">The same planning view, same products &mdash; different UOM selection</div>
+        <div class="ba-grid">
+          <div class="ba-panel fail">
+            <div class="ba-panel-head"><span style="font-size:15px">&#10005;</span> Without ZPU &mdash; UOM: KG</div>
+            <div class="ba-row"><span class="name">Polymer Resin X</span><span class="val">2,400</span></div>
+            <div class="ba-row"><span class="name">Chemical Blend Y</span><span class="val">1,050</span></div>
+            <div class="ba-row"><span class="name">Sensor Module A</span><span class="val blank">BLANK</span></div>
+            <div class="ba-row"><span class="name">Coating Fluid Z</span><span class="val blank">BLANK</span></div>
+            <div class="ba-row"><span class="name">Packaging Film R</span><span class="val blank">BLANK</span></div>
+            <div class="ba-footer">3 of 5 products invisible. No error raised.</div>
+          </div>
+          <div class="ba-panel pass">
+            <div class="ba-panel-head"><span style="font-size:15px">&#10003;</span> With ZPU &mdash; UOM: ZPU</div>
+            <div class="ba-row"><span class="name">Polymer Resin X</span><span class="val">2,400 KG</span></div>
+            <div class="ba-row"><span class="name">Chemical Blend Y</span><span class="val">1,050 KG</span></div>
+            <div class="ba-row"><span class="name">Sensor Module A</span><span class="val">500 EA</span></div>
+            <div class="ba-row"><span class="name">Coating Fluid Z</span><span class="val">780 L</span></div>
+            <div class="ba-row"><span class="name">Packaging Film R</span><span class="val">3,200 M</span></div>
+            <div class="ba-footer">All 5 products visible. Each in its own base UOM.</div>
+          </div>
+        </div>
+      </div>
+
       <ul class="solution-list">
         <li><strong>Every product appears in the planning view.</strong> No more blank cells, no more phantom "missing data" investigations. The planner sees every product's quantity in its native unit.</li>
         <li><strong>Statistical forecast runs completely.</strong> Select ZPU as the forecast operator's UOM, and every product gets a forecast. The algorithm works on the base-unit quantity, which is exactly what you want.</li>
@@ -299,7 +705,7 @@
       <p>Then configure your Excel templates, planning views, and operators to default to <code>ZPU</code>. Planners will see quantities in base UOM without having to think about which UOM to select. It becomes invisible &mdash; which is exactly what good infrastructure should be.</p>
 
       <div class="callout callout-warning">
-        <strong>Don't skip this:</strong> The number one failure mode with ZPU is a new product that gets created without its conversion record. Set up a validation check &mdash; a periodic job that flags any product missing a ZPU conversion &mdash; and make it part of your data quality monitoring.
+        <strong>Don't skip this:</strong> The number one failure mode with ZPU is a new product that gets created without its conversion record. Set up a validation check &mdash; a periodic job that flags any product missing a ZPU conversion &mdash; and make it part of your data quality monitoring. If it's missed, that product silently drops out of every view and operator that uses ZPU.
       </div>
 
       <h2 id="limitations">What ZPU doesn't solve</h2>
@@ -369,7 +775,6 @@ try {
   if (saved) document.documentElement.setAttribute('data-theme', saved);
 } catch(e) {}
 
-// TOC scroll spy
 const tocLinks = document.querySelectorAll('.toc a');
 const sections = Array.from(tocLinks).map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
 function updateToc() {
@@ -384,7 +789,6 @@ function updateToc() {
 window.addEventListener('scroll', updateToc, { passive: true });
 updateToc();
 
-// ZPU Conversion Simulator
 const products = [
   { name: 'Sensor Module A', base: 'EA', qty: 500 },
   { name: 'Polymer Resin X', base: 'KG', qty: 2000 },

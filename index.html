@@ -28,7 +28,6 @@
       <div class="header-right">
         <nav class="site-nav">
           <a href="#articles">Articles</a>
-          <a href="#tools">Tools</a>
           <a href="#about">About</a>
         </nav>
         <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
@@ -56,7 +55,7 @@
     <div class="container">
       <div class="section-header">
         <h2>Articles</h2>
-        <span class="section-count">02 published</span>
+        <span class="section-count">01 published</span>
       </div>
       <div class="card-grid card-grid-2">
 
@@ -91,81 +90,6 @@
           </div>
         </a>
 
-        <a href="articles/time-profiles.html" class="card">
-          <div class="card-preview">
-            <svg viewBox="0 0 480 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g opacity="0.7">
-                <rect x="40" y="25" width="50" height="110" rx="4" fill="var(--accent-secondary)" fill-opacity="0.08" stroke="var(--accent-secondary)" stroke-width="0.5" stroke-opacity="0.3"/>
-                <text x="65" y="18" text-anchor="middle" fill="var(--fg-muted)" font-family="var(--font-mono)" font-size="9">FY</text>
-                <rect x="50" y="35" width="30" height="45" rx="3" fill="var(--accent-secondary)" fill-opacity="0.15" stroke="var(--accent-secondary)" stroke-width="0.5" stroke-opacity="0.3"/>
-                <text x="65" y="60" text-anchor="middle" fill="var(--accent-secondary)" font-family="var(--font-mono)" font-size="9">Q1</text>
-                <rect x="50" y="85" width="30" height="45" rx="3" fill="var(--accent-secondary)" fill-opacity="0.1" stroke="var(--accent-secondary)" stroke-width="0.5" stroke-opacity="0.2"/>
-                <text x="65" y="110" text-anchor="middle" fill="var(--accent-secondary)" font-family="var(--font-mono)" font-size="9">Q2</text>
-              </g>
-              <g opacity="0.8">
-                <rect x="120" y="35" width="250" height="18" rx="3" fill="var(--accent)" fill-opacity="0.12"/>
-                <rect x="120" y="35" width="60" height="18" rx="3" fill="var(--accent)" fill-opacity="0.25"/>
-                <text x="150" y="48" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="9">4 wk</text>
-                <rect x="183" y="35" width="60" height="18" rx="3" fill="var(--accent)" fill-opacity="0.2"/>
-                <text x="213" y="48" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="9">4 wk</text>
-                <rect x="246" y="35" width="75" height="18" rx="3" fill="var(--accent)" fill-opacity="0.15"/>
-                <text x="283" y="48" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="9">5 wk</text>
-              </g>
-              <g opacity="0.5">
-                <line x1="120" y1="70" x2="370" y2="70" stroke="var(--border)" stroke-width="0.5"/>
-                <rect x="120" y="80" width="250" height="12" rx="2" fill="var(--fg-muted)" fill-opacity="0.06"/>
-                <rect x="120" y="80" width="18" height="12" rx="2" fill="var(--accent)" fill-opacity="0.3"/>
-                <rect x="140" y="80" width="18" height="12" rx="2" fill="var(--accent)" fill-opacity="0.25"/>
-                <rect x="160" y="80" width="18" height="12" rx="2" fill="var(--accent)" fill-opacity="0.2"/>
-                <rect x="180" y="80" width="18" height="12" rx="2" fill="var(--accent)" fill-opacity="0.15"/>
-              </g>
-              <text x="120" y="115" fill="var(--fg-muted)" font-family="var(--font-mono)" font-size="9" opacity="0.5">Day → TechWeek → Week → Month → Quarter → Year</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <span class="card-tag tag-sap">SAP IBP</span>
-            <h3>Getting the Time Profile Right: Why It Matters and How to Make It Easier</h3>
-            <p>Technical weeks, retail fiscal calendars, leap week handling — the configuration step every IBP implementation starts with, and the one most prone to rework.</p>
-            <div class="card-meta">
-              <span>With open-source tool</span>
-            </div>
-          </div>
-        </a>
-
-      </div>
-    </div>
-  </section>
-
-  <section id="tools" class="section section-alt">
-    <div class="container">
-      <div class="section-header">
-        <h2>Tools</h2>
-        <span class="section-count">01 available</span>
-      </div>
-      <div class="card-grid">
-
-        <a href="tools/time-profile-generator.html" class="card" style="max-width: 540px;">
-          <div class="card-preview" style="background: var(--accent-light);">
-            <svg viewBox="0 0 540 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <text x="270" y="60" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="28" font-weight="700" opacity="0.25">&gt;_</text>
-              <text x="270" y="90" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="12" opacity="0.5">generate → preview → export CSV</text>
-              <rect x="160" y="105" width="220" height="28" rx="6" fill="var(--accent)" fill-opacity="0.12" stroke="var(--accent)" stroke-width="0.5" stroke-opacity="0.3"/>
-              <text x="270" y="123" text-anchor="middle" fill="var(--accent)" font-family="var(--font-mono)" font-size="11" opacity="0.7">time_profile_2026.csv</text>
-            </svg>
-          </div>
-          <div class="card-body">
-            <span class="card-tag tag-tool">Open Source</span>
-            <h3>IBP Time Profile Generator</h3>
-            <p>Generate SAP IBP time profiles directly in your browser. Supports Gregorian and retail fiscal calendars (4-4-5, 4-5-4, 5-4-4), custom week starts, technical week splits, and automatic leap week handling.</p>
-            <div class="card-meta">
-              <span>No installation</span>
-              <span class="card-meta-dot"></span>
-              <span>Runs in browser</span>
-              <span class="card-meta-dot"></span>
-              <span>CSV export</span>
-            </div>
-          </div>
-        </a>
 
       </div>
     </div>
