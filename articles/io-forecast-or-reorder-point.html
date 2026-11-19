@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forecast or Reorder Point? Getting the Most from SAP IBP Inventory Optimization</title>
+<meta name="description" content="IBP IO gives you a safety stock and a reorder point, but your MRP type lets S/4 use only one. A simple ABC/XYZ/VED framework to decide between PD and V1.">
+<meta property="og:title" content="Forecast or Reorder Point? Getting the Most from SAP IBP Inventory Optimization">
+<meta property="og:description" content="IBP IO gives you a safety stock and a reorder point, but your MRP type lets S/4 use only one. Here's how to decide which one fits each material.">
+<meta property="og:image" content="https://anuragraiscmsolutions.github.io/images/io-forecast-or-reorder-point-cover.png">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Nunito+Sans:wght@400;600&family=Fira+Code:wght@400&display=swap">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .problem-list, .solution-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; margin: 16px 0 20px; }
+  .problem-list li { background: #FEF3C7; border: 1px solid #F59E0B; border-radius: var(--radius-sm); padding: 14px 18px; font-size: 15px; color: #92400E; line-height: 1.6; }
+  .problem-list li strong { color: #92400E; }
+  .solution-list li { background: var(--accent-light); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 14px 18px; font-size: 15px; color: var(--accent); line-height: 1.6; }
+  .solution-list li strong { color: var(--accent); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .problem-list li { background: #422006; color: #FCD34D; border-color: #92400E; }
+    :root:not([data-theme="light"]) .problem-list li strong { color: #FCD34D; }
+  }
+  :root[data-theme="dark"] .problem-list li { background: #422006; color: #FCD34D; border-color: #92400E; }
+  :root[data-theme="dark"] .problem-list li strong { color: #FCD34D; }
+  .article-cover { width: 100%; height: auto; border-radius: var(--radius); border: 1px solid var(--border); margin: 8px 0 28px; display: block; }
+  .diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin: 24px 0; overflow-x: auto; }
+  .diagram-title { font-family: var(--font-heading); font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .diagram-subtitle { font-size: 13px; color: var(--fg-muted); margin-bottom: 16px; }
+  svg.dg { width: 100%; min-width: 560px; height: auto; display: block; }
+  svg.dg text { font-family: var(--font-body); }
+  svg.dg .ink { fill: var(--fg); }
+  svg.dg .quiet { fill: var(--fg-secondary); }
+  svg.dg .box { fill: none; stroke: var(--border-strong); stroke-width: 1.25; }
+  svg.dg .dashedbox { stroke-dasharray: 4 4; }
+  svg.dg .conn path { fill: none; stroke: var(--border-strong); stroke-width: 1.25; }
+  svg.dg .conn.dashed path { stroke-dasharray: 4 4; stroke-width: 1; }
+  svg.dg .arrowhead { fill: var(--border-strong); }
+  svg.dg .pd { fill: rgba(59,130,246,0.14); stroke: #3B82F6; stroke-width: 2; }
+  svg.dg .rop { fill: rgba(249,115,22,0.14); stroke: #F97316; stroke-width: 2; }
+  svg.dg .ins { fill: rgba(245,158,11,0.22); stroke: #F59E0B; stroke-width: 2; }
+  svg.dg .case { fill: var(--bg-alt); stroke: var(--border-strong); stroke-width: 1.25; }
+  svg.dg .nostock { fill: none; stroke: var(--border-strong); stroke-width: 1.25; stroke-dasharray: 3 3; }
+  svg.dg .slab { fill: var(--bg-alt); stroke: var(--border-strong); stroke-width: 1; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="../" class="site-logo">
+      <span class="logo-mark"><svg viewBox="0 0 16 16" fill="none"><circle cx="4" cy="4" r="2" fill="#fff"/><circle cx="12" cy="4" r="2" fill="#fff"/><circle cx="8" cy="12" r="2" fill="#fff"/><line x1="4" y1="4" x2="12" y2="4" stroke="#fff" stroke-width="1.2"/><line x1="4" y1="4" x2="8" y2="12" stroke="#fff" stroke-width="1.2"/><line x1="12" y1="4" x2="8" y2="12" stroke="#fff" stroke-width="1.2"/></svg></span>
+      Anurag Rai
+    </a>
+    <div class="header-right">
+      <nav class="site-nav">
+        <a href="../#articles">Articles</a>
+        <a href="../#tools">Tools</a>
+        <a href="../#about">About</a>
+      </nav>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <a href="../" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Home
+  </a>
+
+  <div class="article-hero">
+    <span class="article-kicker">SAP IBP Inventory Optimization</span>
+    <h1>Forecast or Reorder Point? Getting the Most from SAP IBP Inventory Optimization</h1>
+    <p class="subtitle">IO gives you two numbers. Your MRP type lets S/4 use only one. Here's how to decide which one fits each material.</p>
+    <div class="article-meta">
+      <span class="author"><span class="avatar">AR</span> Anurag Rai</span>
+      <span class="sep">&middot;</span>
+      <span>Published November 2026</span>
+    </div>
+  </div>
+
+  <div class="article-layout">
+    <article class="article-content">
+
+      <img class="article-cover" src="../images/io-forecast-or-reorder-point-cover.png" alt="Forecast or Reorder Point? Safety stock goes to forecast-driven planning (PD), reorder point goes to reorder point planning (V1/VB), shown beside a stacked ABC/XYZ/VED cube.">
+
+      <p>When I started exploring SAP IBP Inventory Optimization (IO) back in 2017, one of the first things I learned was that IO produces two outputs: a <strong>Recommended Safety Stock</strong> and a <strong>Reorder Point</strong>.</p>
+
+      <p>Everyone knows what happens to the safety stock: it flows into time-series supply planning or order-based planning and gets used there. But what about the reorder point? Where does that go?</p>
+
+      <p>Coming from a PP background, I also knew that in the ERP you can effectively use only one of these outputs per material, and the MRP type decides which one. That raised another question. What if my client has only an IO license? IO gives a time-series safety stock, a different value for every period, but the material master has a single safety stock field. How is that supposed to work?</p>
+
+      <p>So what is the intention here, and how can we use these outputs to our maximum benefit? That is what this article is about.</p>
+
+      <h2 id="two-numbers">Two numbers from IBP, two ways to plan</h2>
+
+      <p>IO looks at how much your demand swings, how reliable your suppliers are and what service level you're aiming for. From that, it recommends two numbers:</p>
+
+      <ul>
+        <li><strong>Safety stock:</strong> the extra cushion you keep in case demand is higher or supply is later than expected.</li>
+        <li><strong>Reorder point:</strong> the stock level at which you should place a new order. It's the safety stock plus what you expect to use while waiting for the delivery.</li>
+      </ul>
+
+      <div class="diagram">
+        <div class="diagram-title">Each IO number only works with its matching planning type</div>
+        <div class="diagram-subtitle">Two outputs, two planning paths in S/4</div>
+        <svg class="dg" viewBox="0 60 760 210" role="img" aria-label="Each IO number only works with its matching planning type"><defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrowhead"/></marker></defs><g class="conn"><path d="M174 165H240V110H303" marker-end="url(#arr)"/><path d="M240 165V220H303" marker-end="url(#arr)"/><path d="M455 110H484" marker-end="url(#arr)"/><path d="M455 220H484" marker-end="url(#arr)"/></g><rect x="24" y="133" width="150" height="64" rx="8" class="box"/><text x="99" y="161" class="ink" font-size="13" font-weight="600" text-anchor="middle">IBP Inventory</text><text x="99" y="179" class="ink" font-size="13" font-weight="600" text-anchor="middle">Optimization</text><rect x="305" y="86" width="150" height="48" rx="8" class="pd"/><text x="380" y="114" class="ink" font-size="13" font-weight="600" text-anchor="middle">Safety stock</text><rect x="305" y="196" width="150" height="48" rx="8" class="rop"/><text x="380" y="224" class="ink" font-size="13" font-weight="600" text-anchor="middle">Reorder point</text><rect x="486" y="74" width="250" height="72" rx="8" class="box"/><text x="611" y="100" class="ink" font-size="13" font-weight="600" text-anchor="middle">Forecast planning (PD)</text><text x="611" y="120" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Plans ahead from the forecast</text><text x="611" y="136" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Safety stock is the cushion</text><rect x="486" y="184" width="250" height="72" rx="8" class="box"/><text x="611" y="210" class="ink" font-size="13" font-weight="600" text-anchor="middle">Reorder point planning (V1/VB)</text><text x="611" y="230" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Orders when stock drops low</text><text x="611" y="246" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Reorder point is the trigger</text></svg>
+      </div>
+
+      <p>Each number has a natural home: safety stock works with forecast planning, and the reorder point works with reorder point planning.</p>
+
+      <h2 id="mrp-type">Why one setting decides which number counts</h2>
+
+      <p>In SAP S/4HANA (and ECC), every material carries an <strong>MRP type</strong>. Think of it as the instruction that tells the system how to replenish that item. For this decision, two choices matter:</p>
+
+      <ul>
+        <li><strong>Forecast-driven planning (MRP type <code>PD</code>):</strong> the system looks ahead at forecast and orders, and keeps the safety stock as a cushion. The reorder point is ignored.</li>
+        <li><strong>Reorder point planning (MRP type <code>V1</code> or <code>VB</code>):</strong> the system waits until stock drops below the reorder point, then orders. The forecast is not used to trigger orders.</li>
+      </ul>
+
+      <p>So the question isn't "which number is better?" It's "which way of planning suits this material?" Once you've answered that, you know which IO number to send.</p>
+
+      <div class="callout callout-info">
+        <strong>Practical tip:</strong> Use the <em>manual</em> reorder point types (<code>V1</code>/<code>VB</code>), not the <em>automatic</em> ones (<code>VM</code>/<code>V2</code>). The automatic types recalculate the reorder point themselves and overwrite the value IBP sent.
+      </div>
+
+      <h2 id="io-only">Only have an IO license? Making a time-series safety stock fit one field</h2>
+
+      <p>If IBP supply planning isn't in scope, the ERP is where IO's numbers are actually used. IO gives a value for every period, but the material master holds one safety stock and one reorder point. That doesn't make the time-series useless. It means you choose <strong>which value to send, and how often to refresh it</strong>:</p>
+
+      <ul>
+        <li><strong>Send the value that matters next.</strong> Use the period at the end of the replenishment lead time, since that's the protection today's orders need to cover.</li>
+        <li><strong>Refresh it regularly.</strong> Re-run IO monthly and update the field, so the single value follows the time-series over the year.</li>
+        <li><strong>Use the peak for seasonal items.</strong> Where under-stocking in peak season is costly, send the highest value in the horizon and accept some extra stock off-season.</li>
+        <li><strong>Keep the profile where the ERP supports it.</strong> Time-dependent safety stock in PP/DS, or a range-of-coverage profile in MRP, can carry more of the time-phased shape than a single number.</li>
+      </ul>
+
+      <p>The same applies to the reorder point: send it only to materials on <code>V1</code>/<code>VB</code>, and refresh it on the same rhythm.</p>
+
+      <h2 id="sorting">Sort your materials with three simple questions</h2>
+
+      <p>You don't need a complex model to decide. Ask three questions about each material:</p>
+
+      <ol>
+        <li><strong>How much money does it tie up? (ABC)</strong> A items are the few that make up most of your inventory value. C items are the many cheap ones.</li>
+        <li><strong>How predictable is its demand? (XYZ)</strong> X items sell steadily, Y items swing up and down, and Z items are erratic and hard to forecast.</li>
+        <li><strong>What happens if we run out? (VED)</strong> Vital items stop production or create a safety risk. Essential items hurt, but there is a workaround. Desirable items barely matter.</li>
+      </ol>
+
+      <p>Put together, these three questions place every material in one of 27 cells, like a cube. Value and predictability tell you <em>how</em> to plan the item. Criticality tells you <em>how much protection</em> to buy.</p>
+
+      <h2 id="grid">The decision grid</h2>
+
+      <p>Here's the cube flattened into something you can use on a Monday morning. Find the material's value class (row) and demand pattern (column), then adjust for how critical it is.</p>
+
+      <div class="diagram">
+        <div class="diagram-title">Value and predictability pick the method; criticality sets the protection</div>
+        <div class="diagram-subtitle">ABC × XYZ decision grid, then the VED adjustment</div>
+        <svg class="dg" viewBox="0 36 760 424" role="img" aria-label="Decision grid: ABC by XYZ, then adjust for VED"><defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrowhead"/></marker></defs><rect x="24" y="48" width="12" height="12" rx="3" class="pd"/><text x="42" y="58" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Forecast + safety stock (PD)</text><rect x="250" y="48" width="12" height="12" rx="3" class="rop"/><text x="268" y="58" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Reorder point (V1/VB)</text><rect x="450" y="48" width="12" height="12" rx="3" class="case"/><text x="468" y="58" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Decide case by case</text><text x="212" y="88" class="ink" font-size="13" font-weight="600" text-anchor="middle">X: steady</text><text x="420" y="88" class="ink" font-size="13" font-weight="600" text-anchor="middle">Y: variable</text><text x="628" y="88" class="ink" font-size="13" font-weight="600" text-anchor="middle">Z: erratic</text><text x="24" y="132" class="ink" font-size="15" font-weight="600" text-anchor="start">A</text><text x="24" y="150" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">High value</text><rect x="112" y="100" width="200" height="72" rx="8" class="pd"/><text x="212" y="130" class="ink" font-size="13" font-weight="600" text-anchor="middle">Forecast + safety stock</text><text x="212" y="150" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">High value, easy to forecast</text><rect x="320" y="100" width="200" height="72" rx="8" class="pd"/><text x="420" y="130" class="ink" font-size="13" font-weight="600" text-anchor="middle">Forecast + safety stock</text><text x="420" y="150" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Worth the planning effort</text><rect x="528" y="100" width="200" height="72" rx="8" class="case"/><text x="628" y="130" class="ink" font-size="13" font-weight="600" text-anchor="middle">Forecast, case by case</text><text x="628" y="150" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Or make to order</text><text x="24" y="212" class="ink" font-size="15" font-weight="600" text-anchor="start">B</text><text x="24" y="230" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Medium value</text><rect x="112" y="180" width="200" height="72" rx="8" class="pd"/><text x="212" y="210" class="ink" font-size="13" font-weight="600" text-anchor="middle">Forecast + safety stock</text><text x="212" y="230" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">ROP if lead time is short</text><rect x="320" y="180" width="200" height="72" rx="8" class="pd"/><text x="420" y="210" class="ink" font-size="13" font-weight="600" text-anchor="middle">Forecast + safety stock</text><text x="420" y="230" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Swings need a look ahead</text><rect x="528" y="180" width="200" height="72" rx="8" class="case"/><text x="628" y="210" class="ink" font-size="13" font-weight="600" text-anchor="middle">Case by case</text><text x="628" y="230" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Forecast or min-max</text><text x="24" y="292" class="ink" font-size="15" font-weight="600" text-anchor="start">C</text><text x="24" y="310" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Low value</text><rect x="112" y="260" width="200" height="72" rx="8" class="rop"/><text x="212" y="290" class="ink" font-size="13" font-weight="600" text-anchor="middle">Reorder point</text><text x="212" y="310" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Cheap and steady</text><rect x="320" y="260" width="200" height="72" rx="8" class="rop"/><text x="420" y="290" class="ink" font-size="13" font-weight="600" text-anchor="middle">Reorder point</text><text x="420" y="310" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Low value, some swings</text><rect x="528" y="260" width="200" height="72" rx="8" class="case"/><text x="628" y="290" class="ink" font-size="13" font-weight="600" text-anchor="middle">Min-max or no stock</text><text x="628" y="310" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Order only when needed</text><text x="24" y="362" class="ink" font-size="13" font-weight="600" text-anchor="start">Then adjust for criticality (VED)</text><rect x="24" y="372" width="232" height="72" rx="8" class="box"/><text x="140" y="396" class="ink" font-size="13" font-weight="600" text-anchor="middle">Vital</text><text x="140" y="414" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Raise the service level</text><text x="140" y="430" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Never set to no stock</text><rect x="264" y="372" width="232" height="72" rx="8" class="box"/><text x="380" y="396" class="ink" font-size="13" font-weight="600" text-anchor="middle">Essential</text><text x="380" y="414" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Keep the standard</text><text x="380" y="430" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">service level</text><rect x="504" y="372" width="232" height="72" rx="8" class="box"/><text x="620" y="396" class="ink" font-size="13" font-weight="600" text-anchor="middle">Desirable</text><text x="620" y="414" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Lower the service level</text><text x="620" y="430" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">No stock is fine for CZ</text></svg>
+      </div>
+
+      <p>The logic is simple. Forecasting takes effort, so spend it where it pays back: on expensive items and on items whose demand moves around. For cheap, steady items, a reorder point does the job with almost no planner effort. Erratic items need a closer look whatever their value.</p>
+
+      <p>Stack the grid once for each criticality class and you get the full cube. The method barely changes from layer to layer. What changes is the erratic column: vital Z items keep insurance stock, while desirable Z items aren't stocked at all.</p>
+
+      <div class="diagram">
+        <div class="diagram-title">Criticality mostly changes the erratic (Z) column</div>
+        <div class="diagram-subtitle">Each layer is the ABC × XYZ grid for one VED class</div>
+        <svg class="dg" viewBox="0 70 760 450" role="img" aria-label="3D cube of ABC by XYZ by VED"><defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrowhead"/></marker></defs><g class="conn dashed"><path d="M150 182V300M480 182V300M600 104V222"/><path d="M150 312V430M480 312V430M600 234V352"/></g><polygon points="150,170 480,170 480,182 150,182" class="slab"/><polygon points="480,170 600,92 600,104 480,182" class="slab"/><polygon points="150,170 260,170 300,144 190,144" class="pd"/><text x="225.0" y="161.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">AX</text><polygon points="260,170 370,170 410,144 300,144" class="pd"/><text x="335.0" y="161.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">AY</text><polygon points="370,170 480,170 520,144 410,144" class="ins"/><text x="445.0" y="161.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">AZ</text><polygon points="190,144 300,144 340,118 230,118" class="pd"/><text x="265.0" y="135.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">BX</text><polygon points="300,144 410,144 450,118 340,118" class="pd"/><text x="375.0" y="135.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">BY</text><polygon points="410,144 520,144 560,118 450,118" class="ins"/><text x="485.0" y="135.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">BZ</text><polygon points="230,118 340,118 380,92 270,92" class="rop"/><text x="305.0" y="109.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">CX</text><polygon points="340,118 450,118 490,92 380,92" class="rop"/><text x="415.0" y="109.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">CY</text><polygon points="450,118 560,118 600,92 490,92" class="ins"/><text x="525.0" y="109.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">CZ</text><text x="24" y="131" class="ink" font-size="13" font-weight="600" text-anchor="start">Vital</text><text x="24" y="149" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Stops the line</text><polygon points="150,300 480,300 480,312 150,312" class="slab"/><polygon points="480,300 600,222 600,234 480,312" class="slab"/><polygon points="150,300 260,300 300,274 190,274" class="pd"/><text x="225.0" y="291.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">AX</text><polygon points="260,300 370,300 410,274 300,274" class="pd"/><text x="335.0" y="291.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">AY</text><polygon points="370,300 480,300 520,274 410,274" class="case"/><text x="445.0" y="291.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">AZ</text><polygon points="190,274 300,274 340,248 230,248" class="pd"/><text x="265.0" y="265.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">BX</text><polygon points="300,274 410,274 450,248 340,248" class="pd"/><text x="375.0" y="265.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">BY</text><polygon points="410,274 520,274 560,248 450,248" class="case"/><text x="485.0" y="265.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">BZ</text><polygon points="230,248 340,248 380,222 270,222" class="rop"/><text x="305.0" y="239.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">CX</text><polygon points="340,248 450,248 490,222 380,222" class="rop"/><text x="415.0" y="239.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">CY</text><polygon points="450,248 560,248 600,222 490,222" class="case"/><text x="525.0" y="239.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">CZ</text><text x="24" y="261" class="ink" font-size="13" font-weight="600" text-anchor="start">Essential</text><text x="24" y="279" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Workaround exists</text><polygon points="150,430 480,430 480,442 150,442" class="slab"/><polygon points="480,430 600,352 600,364 480,442" class="slab"/><polygon points="150,430 260,430 300,404 190,404" class="pd"/><text x="225.0" y="421.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">AX</text><polygon points="260,430 370,430 410,404 300,404" class="pd"/><text x="335.0" y="421.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">AY</text><polygon points="370,430 480,430 520,404 410,404" class="nostock"/><text x="445.0" y="421.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">AZ</text><polygon points="190,404 300,404 340,378 230,378" class="pd"/><text x="265.0" y="395.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">BX</text><polygon points="300,404 410,404 450,378 340,378" class="pd"/><text x="375.0" y="395.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">BY</text><polygon points="410,404 520,404 560,378 450,378" class="nostock"/><text x="485.0" y="395.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">BZ</text><polygon points="230,378 340,378 380,352 270,352" class="rop"/><text x="305.0" y="369.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">CX</text><polygon points="340,378 450,378 490,352 380,352" class="rop"/><text x="415.0" y="369.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">CY</text><polygon points="450,378 560,378 600,352 490,352" class="nostock"/><text x="525.0" y="369.0" class="ink" font-size="11.5" font-weight="600" text-anchor="middle">CZ</text><text x="24" y="391" class="ink" font-size="13" font-weight="600" text-anchor="start">Desirable</text><text x="24" y="409" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Low impact</text><text x="205" y="462" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">X: steady</text><text x="315" y="462" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Y: variable</text><text x="425" y="462" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Z: erratic</text><text x="550" y="421" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">A: high value</text><text x="590" y="395" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">B: medium</text><text x="630" y="369" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">C: low value</text><rect x="24" y="490" width="12" height="12" rx="3" class="pd"/><text x="42" y="500" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Forecast + safety stock</text><rect x="200" y="490" width="12" height="12" rx="3" class="rop"/><text x="218" y="500" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Reorder point</text><rect x="330" y="490" width="12" height="12" rx="3" class="case"/><text x="348" y="500" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Case by case</text><rect x="470" y="490" width="12" height="12" rx="3" class="ins"/><text x="488" y="500" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">Insurance stock</text><rect x="610" y="490" width="12" height="12" rx="3" class="nostock"/><text x="628" y="500" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">No stock / MTO</text></svg>
+      </div>
+
+      <h2 id="quick-check">A quick check for any single material</h2>
+
+      <p>When you're looking at one material and don't want to open the whole grid, these four questions get you to the same answer.</p>
+
+      <div class="diagram">
+        <div class="diagram-title">Four questions place any material</div>
+        <div class="diagram-subtitle">A quick decision tree for a single material</div>
+        <svg class="dg" viewBox="0 60 760 484" role="img" aria-label="Four questions place any material"><defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrowhead"/></marker></defs><g class="conn"><path d="M340 100H418" marker-end="url(#arr)"/><path d="M340 180H418" marker-end="url(#arr)"/><path d="M340 260H418" marker-end="url(#arr)"/><path d="M340 340H438" marker-end="url(#arr)"/><path d="M190 124V154" marker-end="url(#arr)"/><path d="M190 204V234" marker-end="url(#arr)"/><path d="M190 284V314" marker-end="url(#arr)"/><path d="M190 364V390" marker-end="url(#arr)"/><path d="M190 448V478" marker-end="url(#arr)"/><path d="M560 368V478" marker-end="url(#arr)"/><path d="M692 284V478" marker-end="url(#arr)"/></g><rect x="40" y="76" width="300" height="48" rx="8" class="box"/><text x="190" y="104" class="ink" font-size="13" font-weight="400" text-anchor="middle">Does it feed a bill of materials?</text><rect x="40" y="156" width="300" height="48" rx="8" class="box"/><text x="190" y="184" class="ink" font-size="13" font-weight="400" text-anchor="middle">Long or unreliable lead time?</text><rect x="40" y="236" width="300" height="48" rx="8" class="box"/><text x="190" y="264" class="ink" font-size="13" font-weight="400" text-anchor="middle">Is it a low-value (C) item?</text><rect x="40" y="316" width="300" height="48" rx="8" class="box"/><text x="190" y="344" class="ink" font-size="13" font-weight="400" text-anchor="middle">Is demand erratic (Z)?</text><text x="379" y="92" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">yes</text><text x="379" y="172" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">yes</text><text x="379" y="252" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">no</text><text x="389" y="332" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">yes</text><text x="200" y="143" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">no</text><text x="200" y="223" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">no</text><text x="200" y="303" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">yes</text><text x="200" y="381" class="quiet" font-size="11.5" font-weight="400" text-anchor="start">no</text><rect x="420" y="76" width="280" height="208" rx="8" class="pd"/><text x="560" y="172" class="ink" font-size="13" font-weight="600" text-anchor="middle">Forecast + safety stock</text><text x="560" y="192" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">MRP type PD</text><text x="560" y="208" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Send IO safety stock</text><rect x="440" y="312" width="240" height="56" rx="8" class="case"/><text x="560" y="336" class="ink" font-size="13" font-weight="600" text-anchor="middle">Min-max or no stock</text><text x="560" y="354" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">Order only when needed</text><rect x="40" y="392" width="300" height="56" rx="8" class="rop"/><text x="190" y="416" class="ink" font-size="13" font-weight="600" text-anchor="middle">Reorder point</text><text x="190" y="434" class="quiet" font-size="11.5" font-weight="400" text-anchor="middle">V1/VB, send IO reorder point</text><rect x="40" y="480" width="660" height="48" rx="8" class="box dashedbox"/><text x="370" y="508" class="ink" font-size="13" font-weight="600" text-anchor="middle">Last step for every item: if it is vital, raise its service level</text></svg>
+      </div>
+
+      <p>The first two questions catch the items that <em>must</em> be planned ahead, whatever their value: parts used in production, and items whose suppliers are slow or unreliable. Everything else comes down to value and how steady the demand is.</p>
+
+      <h2 id="keeping-it-working">Keeping it working</h2>
+
+      <p>A framework set up once at go-live and never revisited goes stale. A few habits keep it useful:</p>
+
+      <ul class="solution-list">
+        <li><strong>Re-sort materials every quarter.</strong> Products move between classes as they grow, mature and phase out.</li>
+        <li><strong>Run IO monthly</strong>, and only update the ERP when a value changes meaningfully. Planners shouldn't chase small weekly changes.</li>
+        <li><strong>Watch for warning signs.</strong> If a reorder point item keeps needing urgent orders, it probably belongs on forecast planning.</li>
+      </ul>
+
+      <p><strong>Common traps to avoid</strong></p>
+
+      <ul class="problem-list">
+        <li>Sending a reorder point to a forecast-driven material and expecting it to work. It won't.</li>
+        <li>Using the automatic reorder point types, which quietly overwrite IBP's number.</li>
+        <li>Stacking protection: an optimistic forecast <em>plus</em> a full safety stock means you're buffering twice.</li>
+        <li>Putting components that feed a bill of materials on reorder point. Their demand comes from production plans, so they belong on forecast planning.</li>
+      </ul>
+
+      <h2 id="bottom-line">The bottom line</h2>
+
+      <p>IBP Inventory Optimization gives you the right numbers. The MRP type decides whether your ERP actually uses them.</p>
+
+      <p>Plan from the forecast where looking ahead pays off: high-value, predictable or long lead time items. Use a reorder point where demand is steady and the stakes are low. Then let criticality decide how much safety you buy.</p>
+
+      <p style="margin-top: 32px; font-style: italic; color: var(--fg-secondary);">How do you plan your C items today: forecast or reorder point? I'd love to hear &mdash; drop a comment or DM me.</p>
+
+      <div class="article-tags">
+        <span>SAP IBP</span>
+        <span>Inventory Optimization</span>
+        <span>Safety Stock</span>
+        <span>Reorder Point</span>
+        <span>MRP Type</span>
+        <span>ABC/XYZ/VED</span>
+      </div>
+
+    </article>
+
+    <aside class="article-sidebar">
+      <nav class="toc">
+        <div class="toc-title">On this page</div>
+        <a href="#two-numbers">Two numbers, two paths</a>
+        <a href="#mrp-type">Why the MRP type decides</a>
+        <a href="#io-only">IO-only license</a>
+        <a href="#sorting">Three questions</a>
+        <a href="#grid">The decision grid</a>
+        <a href="#quick-check">Quick check</a>
+        <a href="#keeping-it-working">Keeping it working</a>
+        <a href="#bottom-line">The bottom line</a>
+      </nav>
+    </aside>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>&copy; 2026 Anurag Rai</p>
+    <div class="footer-links">
+      <a href="https://www.linkedin.com/in/anurag-rai-42561b7a/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/AnuragRaiSCMSolutions" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleTheme() {
+  const root = document.documentElement;
+  const current = root.getAttribute('data-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  let next;
+  if (!current) next = prefersDark ? 'light' : 'dark';
+  else if (current === 'dark') next = 'light';
+  else next = 'dark';
+  root.setAttribute('data-theme', next);
+  try { localStorage.setItem('theme', next); } catch(e) {}
+}
+try {
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+} catch(e) {}
+
+const tocLinks = document.querySelectorAll('.toc a');
+const sections = Array.from(tocLinks).map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+function updateToc() {
+  let current = '';
+  for (const s of sections) {
+    if (s.getBoundingClientRect().top <= 120) current = s.id;
+  }
+  tocLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', updateToc, { passive: true });
+updateToc();
+
+</script>
+
+</body>
+</html>
